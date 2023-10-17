@@ -1,70 +1,97 @@
-# Getting Started with Create React App
+# [Light Bootstrap Dashboard](http://www.creative-tim.com/product/light-bootstrap-dashboard)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![alt text](http://s3.amazonaws.com/creativetim_bucket/products/32/original/opt_lbd_thumbnail.jpg "Light Bootstrap Dashboard")
 
-## Available Scripts
+Light Bootstrap Dashboard is an admin dashboard template designed to be beautiful and simple. It is built on top of Bootstrap 4 and it is fully responsive. It comes with a big collections of elements that will offer you multiple possibilities to create the app that best fits your needs. It can be used to create admin panels, project management systems, web applications backend, CMS or CRM.
 
-In the project directory, you can run:
+The product represents a big suite of front-end developer tools that can help you jump start your project. We have created it thinking about things you actually need in a dashboard. Light Bootstrap Dashboard contains multiple handpicked and optimised plugins. Everything is designed to fit with one another. As you will be able to see, the dashboard you can access on Creative Tim is a customisation of this product.
 
-### `npm start`
+It comes with 6 filter colors for the sidebar (`black`, `azure`,`green`,`orange`,`red`,`purple`) and an option to have a background image.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Special thanks go to: Robert McIntosh for the notification system Chartist for the wonderful charts We are very excited to share this dashboard with you and we look forward to hearing your feedback!
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Links:
 
-### `npm test`
+- [Live Preview](http://demos.creative-tim.com/light-bootstrap-dashboard/examples/dashboard.html?ref=github-repo)
+- [Video Tutorial](https://www.youtube.com/watch?v=c3M3NQtFyqM)
+- [Light Bootstrap Dashboard PRO](https://www.creative-tim.com/product/light-bootstrap-dashboard-pro) (from $39)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Quick start
 
-### `npm run build`
+Quick start options:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Download from Github.
+Download from Creative Tim.
+Clone the repo: git clone https://github.com/creativetimofficial/light-bootstrap-dashboard.git.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### What's included
 
-### `npm run eject`
+Within the download you'll find the following directories and files:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+Light Bootstrap Dashboard
+├── CHANGELOG.md
+├── README.md
+├── assets
+│   ├── css
+│   ├── fonts
+│   ├── img
+│   ├── js
+│   │   ├── core
+│   │   │   ├── bootstrap.min.js
+│   │   │   ├── jquery.3.2.1.min.js
+│   │   │   └── popper.min.js
+│   │   ├── demo.js
+│   │   ├── light-bootstrap-dashboard.js
+│   │   └── plugins
+│   │       ├── bootstrap-datepicker.js
+│   │       ├── bootstrap-notify.js
+│   │       ├── bootstrap-switch.js
+│   │       ├── chartist.min.js
+│   │       └── nouislider.min.js
+│   └── main.css
+├── deploy.sh
+├── documentation
+│   ├── template.html
+│   └── tutorial-components.html
+├── examples
+│   ├── dashboard.html
+│   ├── forms
+│   │   └── extended.html
+│   ├── icons.html
+│   ├── maps.html
+│   ├── notifications.html
+│   ├── table.html
+│   ├── typography.html
+│   ├── upgrade.html
+│   └── user.html
+└── package-lock.json
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### License
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Copyright 2019 Creative Tim (http://www.creative-tim.com)
+Licensed under MIT (https://github.com/creativetimofficial/light-bootstrap-dashboard/blob/master/LICENSE.md)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Useful Links
 
-## Learn More
+More products from Creative Tim: http://www.creative-tim.com/products
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Tutorials: https://www.youtube.com/channel/UCVyTG4sCw-rOvB9oHkzZD1w
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Freebies: http://www.creative-tim.com/products
 
-### Code Splitting
+Affiliate Program (earn money): http://www.creative-tim.com/affiliates/new
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Social Media:
 
-### Analyzing the Bundle Size
+Twitter: https://twitter.com/CreativeTim
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Facebook: https://www.facebook.com/CreativeTim
 
-### Making a Progressive Web App
+Dribbble: https://dribbble.com/creativetim
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Google+: https://plus.google.com/+CreativetimPage
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Instagram: https://instagram.com/creativetimofficial
