@@ -103,51 +103,12 @@
     </div>
     <!-- SideBar -->        
     <div class="main-panel">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg " color-on-scroll="500">
-            <div class="container-fluid">
-                <!--<a class="navbar-brand" href="index.html"> Blue Express </a>-->
-                <div class="collapse navbar-collapse justify-content-end" id="navigation">
-                    
-                    <ul class="navbar-nav ml-auto">
-                        <!--<li class="nav-item">
-                            <a class="nav-link" href="trackshipment.html">
-                                <span class="no-icon">Track Shipment    </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#pablo">
-                                <span class="no-icon">About US</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#pablo">
-                                <span class="no-icon">Contact Us</span>
-                            </a>
-                        </li>-->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="no-icon">Shipment</span>
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                <a class="dropdown-item" href="booking.html">Book Shipment</a>
-                                <a class="dropdown-item" href="trackshipment.html">Track/Modify Shipment</a>
-                                <a class="dropdown-item" href="#">Reports</a>
-                                <div class="divider"></div>
-                                <a class="dropdown-item" href="#">More Options</a>
-                            </div>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span class="no-icon">Your Account</span>
-                            </a>
-                        </li>
-                        
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        <!-- End Navbar -->
+    <?php
+
+        include("./includes/navbar.php");
+
+    ?>
+
             <!-- Main Content -->
             <div class="content">
                 <div class="container-fluid">
