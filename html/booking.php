@@ -38,10 +38,125 @@
     <link href="../assets/css/light-bootstrap-dashboard.css?v=2.0.0 " rel="stylesheet" />
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link href="../assets/css/demo.css" rel="stylesheet" />
-</head>
+    <script src="../assets/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
 
-<body>
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            
+            $('#bookShipment').submit(function(e) {
+                e.preventDefault();
+                var formData = $('#bookShipment').serializeArray();
+                var error_res="";
+                                                
+                if(formData.find(field => field.name === "sender_phone").value.length!=10){
+                    error_res=error_res+"<li>Error in Sender Mobile Number</li>";
+                }
+                
+                if(formData.find(field => field.name === "Receiver_phone").value.length!=10){
+                    error_res=error_res+"<li>Error in receiver Mobile Number</li>";
+                }
+                
+                if(formData.find(field => field.name === "sender_pincode").value.length!=6){
+                    error_res=error_res+"<li>Error in Sender Pincode</li>";
+                }
+
+                if(formData.find(field => field.name === "Receiver_pincode").value.length!=6){
+                    error_res=error_res+"<li>Error in Receiver Pincode</li>";
+                }
+
+                if(formData.find(field => field.name === "delivery_method").value==="Select Delivery Method"){
+                    error_res=error_res+"<li>Select Shipment Method Properly</li>";
+                }
+
+                if(formData.find(field => field.name === "content_type").value==="Select Content Type"){
+                    error_res=error_res+"<li>Select Shipment Content Type Properly</li>";
+                }
+
+                if(formData.find(field => field.name === "payment_mode").value==="Select Payment Method"){
+                    error_res=error_res+"<li>Select Payment Method Properly</li>";
+                }
+               
+                if(error_res.length!=0){                    
+                    $("#modal_message").empty();
+                    $("#modal_message").append("<ul>"+error_res+"</ul>");
+                    $('#error_modal').modal('show');
+                }
+                else{
+
+                /*$.each(formData, function(i, field){
+                    $("#xx").append(field.name + ":" + field.value + " ");
+                });*/
+
+                    $.ajax({
+                        type: "POST",
+                        url: './queries/bookShipment.php',
+                        data: {formData: formData},
+                        success: function(response)
+                        {
+                            var jsonData = JSON.parse(response);
+                            if (jsonData.success == "1")
+                            {
+                                //location.href = 'my_profile.php';
+                                alert('Succeed');
+                            }
+                            else
+                            {
+                                alert('Invalid!');
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+    </script>
+
+
+    <!--<script>
+
+
+
+    function create () {
+        alert("Echo clicked");
+        $.ajax({
+            url:"test.php",    //the page containing php script
+            type: "post",    //request type,
+            dataType: 'json',
+            data: {registration: "success", name: "xyz", email: "abc@gmail.com"},
+            success:function(result){
+                console.log(result.abc);
+            }
+        });
+    }
+</script>-->
+    
+</head>
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" />
+ <!-- Mini Modal -->
+ <div class="modal fade  modal-primary" id="error_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!--<div class="modal-header justify-content-center">
+                <div class="modal-profile">
+                    <i class="nc-icon nc-bulb-63"></i>
+                </div>
+            </div>-->
+            <div class="modal-body text-center">
+                <p>Resolve below error before submitting the form</p>
+                <p id="modal_message"></p>
+            </div>
+            <div class="modal-footer">                
+                <button type="button" class="btn btn-link btn-simple" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--  End Modal -->
+
     <div class="wrapper">
+
         <!-- SideBar -->
         <div class="sidebar" data-image="../assets/img/sidebar-5.jpg">
             <!--
@@ -61,49 +176,7 @@
                             <i class="nc-icon nc-chart-pie-35"></i>
                             <p>Dashboard</p>
                         </a>
-                    </li>
-                    <!--<li>
-                        <a class="nav-link" href="./user.html">
-                            <i class="nc-icon nc-circle-09"></i>
-                            <p>User Profile</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="./table.html">
-                            <i class="nc-icon nc-notes"></i>
-                            <p>Table List</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="./typography.html">
-                            <i class="nc-icon nc-paper-2"></i>
-                            <p>Typography</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="./icons.html">
-                            <i class="nc-icon nc-atom"></i>
-                            <p>Icons</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="./maps.html">
-                            <i class="nc-icon nc-pin-3"></i>
-                            <p>Maps</p>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="./notifications.html">
-                            <i class="nc-icon nc-bell-55"></i>
-                            <p>Notifications</p>
-                        </a>
-                    </li>
-                    <li class="nav-item active active-pro">
-                        <a class="nav-link active" href="upgrade.html">
-                            <i class="nc-icon nc-alien-33"></i>
-                            <p>Upgrade to PRO</p>
-                        </a>
-                    </li>-->
+                    </li>                  
                 </ul>
             </div>
         </div>
@@ -130,24 +203,24 @@
                                         <p class="card-category">Enter Shipment Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
                                     </div>
                                 <div class="card-body">
-                                    <form>
+                                    <form id="bookShipment" method="post">
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Shipment Type <span style="color:red;font-weight:bold">*</span></label>
-                                                    <input type="text" class="form-control" placeholder="Enter Shipment Type" required>
+                                                    <input type="text" id="shipment_type" name="shipment_type" class="form-control" placeholder="Enter Shipment Type" required>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="form-group">
-                                                    <label>Shipment Weight <span style="color:red;font-weight:bold">*</span></label>
-                                                    <input type="number" class="form-control" placeholder="Enter Shipment Weight" required>
+                                                    <label>Shipment Weight (In Kg)<span style="color:red;font-weight:bold">*</span></label>
+                                                    <input type="number" id="shipment_weight" name="shipment_weight" class="form-control" placeholder="Enter Shipment Weight" required>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Shipment Delivery Method <span style="color:red;font-weight:bold">*</span></label>
-                                                    <select class="form-control" required>
+                                                    <select class="form-control" id="delivery_method" name="delivery_method" required>
                                                         <option value="Select Delivery Method">Select Delivery Method</option>
                                                         <option value="Ground">Ground</option>
                                                         <option value="Air">Air</option>                                                        
@@ -158,7 +231,7 @@
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Shipment Content Type <span style="color:red;font-weight:bold">*</span></label>
-                                                    <select class="form-control" required>
+                                                    <select class="form-control" id="content_type" name="content_type" required>
                                                         <option value="Select Shipment Content Type">Select Content Type</option>
                                                         <option value="Documents">Documents</option>
                                                         <option value="Food">Food Items/option>
@@ -171,25 +244,25 @@
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="form-group">
-                                                    <label>Shipment Cost <span style="color:red;font-weight:bold">*</span></label>
-                                                    <input type="number" class="form-control" placeholder="Enter Shipment Cost" required>
+                                                    <label>Shipment Cost (In Rupees) <span style="color:red;font-weight:bold">*</span></label>
+                                                    <input type="number" id="shipment_cost" name="shipment_cost" class="form-control" placeholder="Enter Shipment Cost" required>
                                                 </div>
                                             </div>                                            
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Booking Date <span style="color:red;font-weight:bold">*</span></label>
-                                                    <input type="datetime-local" class="form-control" required>
+                                                    <input type="datetime-local" id="booking_date" name="booking_date" class="form-control" required>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>Shipment Additional Information <span style="color:red;font-weight:bold">*</span></label>
-                                                    <textarea class="form-control" rows="5" placeholder="Enter Additional Information"></textarea>
+                                                    <textarea class="form-control" rows="5" id="add_info" name="add_info" placeholder="Enter Additional Information"></textarea>
                                                 </div>
                                             </div>
                                         </div>                                        
                                         <div class="clearfix"></div>
-                                    </form>
+                                    
                                 </div>
                             </div>   
                         </div>   
@@ -203,7 +276,7 @@
                                         <p class="card-category">Enter Sender Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
                                     </div>
                                 <div class="card-body">
-                                    <form>
+                                    
                                     <div class="row">
                                         <div class="col-md-3">
                                             <div class="form-group">
@@ -222,7 +295,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="sender_phone">Sender Phone Number:</label>
-                                                <input type="tel" class="form-control"  id="sender_phone" name="sender_phone" placeholder="Sender's Phone Number" required>
+                                                <input type="tel" class="form-control"  id="sender_phone" name="sender_phone" placeholder="Sender's Phone Number" maxlength="10" required>
                                             </div>
                                         </div>
 
@@ -544,11 +617,11 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="sender_pincode">Sender Pincode: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control" id="sender_pincode" name="sender_pincode" placeholder="Sender's Pincode" required>
+                                                <input type="number" class="form-control" id="sender_pincode" name="sender_pincode" placeholder="Sender's Pincode" minlength="6" maxlength="6" required>
                                             </div>
                                         </div>
                                     </div>
-                                    </form>
+                                    
                                 </div>
                             </div>   
                         </div>   
@@ -562,7 +635,7 @@
                                         <p class="card-category">Enter Receiver Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
                                     </div>
                                 <div class="card-body">
-                                    <form>
+                                    
                                     <div class="row">
                                         <div class="col-md-3">
                                             <div class="form-group">
@@ -581,7 +654,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_phone">Receiver Phone Number: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="tel" class="form-control"  id="Receiver_phone" name="Receiver_phone" placeholder="Receiver's Phone Number" required>
+                                                <input type="tel" class="form-control"  id="Receiver_phone" name="Receiver_phone" placeholder="Receiver's Phone Number" maxlength="10" required>
                                             </div>
                                         </div>
 
@@ -902,11 +975,11 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_pincode">Receiver Pincode: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control" id="Receiver_pincode" name="Receiver_pincode" placeholder="Receiver's Pincode" required>
+                                                <input type="number" class="form-control" id="Receiver_pincode" name="Receiver_pincode" placeholder="Receiver's Pincode" minlength="6" maxlength="6" required>
                                             </div>
                                         </div>
                                     </div>
-                                    </form>
+                                    
                                 </div>
                             </div>   
                         </div>   
@@ -921,7 +994,7 @@
                                         <p class="card-category">Enter payment Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
                                     </div>
                                 <div class="card-body">
-                                    <form>
+                                    
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="form-group">
@@ -1070,7 +1143,6 @@
  -->
 </body>
 <!--   Core JS Files   -->
-<script src="../assets/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
 <script src="../assets/js/core/popper.min.js" type="text/javascript"></script>
 <script src="../assets/js/core/bootstrap.min.js" type="text/javascript"></script>
 <!--  Plugin for Switches, full documentation here: http://www.jque.re/plugins/version3/bootstrap.switch/ -->
