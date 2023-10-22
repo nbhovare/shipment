@@ -62,10 +62,17 @@
                         data: send_data,
                         success: function(response)
                         {
-                            var jsonData = response[0];                            
+                            var jsonData = response[0];
+                            //if(jsonData.hasOwnProperty("error_msg")){
+                            if(jsonData["error_msg"]){
+                                alert(jsonData.error_msg);
+                            }                
+                            else{
+                                alert(jsonData.shipment_id);
+                            }            
                         }
                     });
-                }
+                }   
             });
         });
 

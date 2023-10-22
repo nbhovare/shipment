@@ -17,10 +17,8 @@
 
                     // Encode the data as JSON
                     $jsonData = json_encode($data);
-
-                    // Set headers and send the JSON response
-                    header("Content-Type: application/json");
-                    echo $jsonData;              
+                    
+                    
                 /*while($row = mysqli_fetch_assoc($execute_query)) {
                     
 
@@ -31,16 +29,26 @@
                     "--------------------------------<br>";
                }*/
             }
-            else{
-                echo "Shipment ID does not exist";
+            else{             
+                $res=array(array("error_msg"=>"Shipment ID does not exist"));
+                $jsonData = json_encode($res);
+                //echo "Shipment ID does not exist";
             }
         }
         else {
-            echo "Error";
+            $res=array(array("error_msg"=>"Error"));
+            $jsonData = json_encode($res);
+            //echo "Error";
         }
     }
     else {
-        echo "Enter Shipment ID Properly";
+        $res=array(array("error_msg"=>"Enter Shipment ID Properly"));
+        $jsonData = json_encode($res);
+        //echo "Enter Shipment ID Properly";
     }
+                
+    // Set headers and send the JSON response
+    header("Content-Type: application/json");
+    echo $jsonData;
 
 ?>
