@@ -51,19 +51,19 @@
                 var error_res="";
                                                 
                 if(formData.find(field => field.name === "sender_phone").value.length!=10){
-                    error_res=error_res+"<li>Error in Sender Mobile Number</li>";
+                    error_res=error_res+"<li>Enter Sender Mobile Number Properly</li>";
                 }
                 
                 if(formData.find(field => field.name === "Receiver_phone").value.length!=10){
-                    error_res=error_res+"<li>Error in receiver Mobile Number</li>";
+                    error_res=error_res+"<li>Enter receiver Mobile Number Properly</li>";
                 }
                 
                 if(formData.find(field => field.name === "sender_pincode").value.length!=6){
-                    error_res=error_res+"<li>Error in Sender Pincode</li>";
+                    error_res=error_res+"<li>Enter Sender Pincode Properly</li>";
                 }
 
                 if(formData.find(field => field.name === "Receiver_pincode").value.length!=6){
-                    error_res=error_res+"<li>Error in Receiver Pincode</li>";
+                    error_res=error_res+"<li>Enter Receiver Pincode Properly</li>";
                 }
 
                 if(formData.find(field => field.name === "delivery_method").value==="Select Delivery Method"){
@@ -92,15 +92,17 @@
                     $.ajax({
                         type: "POST",
                         url: './queries/bookShipment.php',
-                        data: {formData: formData},
+                        data: {formData: formData},                    
                         success: function(response)
                         {
+                            alert(response);
                             var jsonData = JSON.parse(response);
+                            alert(jsonData);
                             if (jsonData.success == "1")
                             {
                                 //location.href = 'my_profile.php';
                                 alert('Succeed');
-                            }
+                            }2
                             else
                             {
                                 alert('Invalid!');
@@ -256,7 +258,7 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label>Shipment Additional Information <span style="color:red;font-weight:bold">*</span></label>
+                                                    <label>Shipment Additional Information <span style="color:red;font-weight:bold">(Optional)</span></label>
                                                     <textarea class="form-control" rows="5" id="add_info" name="add_info" placeholder="Enter Additional Information"></textarea>
                                                 </div>
                                             </div>
@@ -303,7 +305,7 @@
                                             <div class="form-group">
                                                 <label for="sender_address">Sender Address: <span style="color:red;font-weight:bold">*</span></label>
                                                 
-                                                <textarea class="form-control" rows="5" id="sender_address" name="sender_address" placeholder="Sender's Full Address"></textarea>
+                                                <textarea class="form-control" rows="5" id="sender_address" name="sender_address" placeholder="Sender's Full Address" required></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -319,7 +321,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="sender_state">Sender State: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                <select name="state" id="sender_state" name="sender_state" class="form-control">
+                                                <select name="state" id="sender_state" name="sender_state" class="form-control" required>
                                                     <option value="Andhra Pradesh">Select State</option>
                                                     <option value="Andhra Pradesh">Andhra Pradesh</option>
                                                     <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
@@ -364,7 +366,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="sender_country">Sender Country: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                <select id="sender_country" name="sender_country" class="form-control">
+                                                <select id="sender_country" name="sender_country" class="form-control" required>
                                                     <option value="India">India</option>
                                                     <option value="Afghanistan">Afghanistan</option>
                                                     <option value="Åland Islands">Åland Islands</option>
@@ -677,7 +679,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_state">Receiver State: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                <select name="state" id="receiver_state" name="receiver_state" class="form-control">
+                                                <select name="state" id="receiver_state" name="receiver_state" class="form-control" required>
                                                     <option value="Andhra Pradesh">Select State</option>
                                                     <option value="Andhra Pradesh">Andhra Pradesh</option>
                                                     <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
@@ -722,7 +724,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_country">Receiver Country: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                <select id="receiver_country" name="receiver_country" class="form-control">
+                                                <select id="receiver_country" name="receiver_country" class="form-control" required>
                                                     <option value="India">India</option>
                                                     <option value="Afghanistan">Afghanistan</option>
                                                     <option value="Åland Islands">Åland Islands</option>

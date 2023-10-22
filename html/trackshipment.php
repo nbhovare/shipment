@@ -31,9 +31,80 @@
     <link href="../assets/css/light-bootstrap-dashboard.css?v=2.0.0 " rel="stylesheet" />
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link href="../assets/css/demo.css" rel="stylesheet" />
+
+    
+
+    <script src="../assets/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            
+            $('#trackShipment').submit(function(e) {
+                e.preventDefault();                
+                var error_res="";
+                   
+                var shipmentID=document.getElementById("shipmentID").value;
+                if(shipmentID.length!=5){
+                    error_res=error_res+"<li>Enter Shipment ID Properly</li>";
+                }
+                                
+                if(error_res.length!=0){                    
+                    $("#modal_message").empty();
+                    $("#modal_message").append("<ul>"+error_res+"</ul>");
+                    $('#error_modal').modal('show');
+                }
+                else{
+
+                    $.ajax({
+                        type: "POST",
+                        url: './queries/trackShipment.php',
+                        data: {formData: formData},
+                        success: function(response)
+                        {
+                            alert(response);
+                            var jsonData = JSON.parse(response);
+                            alert(jsonData);
+                            if (jsonData.success == "1")
+                            {
+                                //location.href = 'my_profile.php';
+                                alert('Succeed');
+                            }
+                            else
+                            {
+                                alert('Invalid!');
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+    </script>
+
 </head>
 
 <body>
+
+ <!-- Mini Modal -->
+ <div class="modal fade  modal-primary" id="error_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!--<div class="modal-header justify-content-center">
+                <div class="modal-profile">
+                    <i class="nc-icon nc-bulb-63"></i>
+                </div>
+            </div>-->
+            <div class="modal-body text-center">
+                <p>Resolve below error before submitting the form</p>
+                <p id="modal_message"></p>
+            </div>
+            <div class="modal-footer">                
+                <button type="button" class="btn btn-link btn-simple" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--  End Modal -->
     <div class="wrapper">
 
        <!-- SideBar -->
@@ -55,49 +126,7 @@
                         <i class="nc-icon nc-chart-pie-35"></i>
                         <p>Dashboard</p>
                     </a>
-                </li>
-                <!--<li>
-                    <a class="nav-link" href="./user.html">
-                        <i class="nc-icon nc-circle-09"></i>
-                        <p>User Profile</p>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" href="./table.html">
-                        <i class="nc-icon nc-notes"></i>
-                        <p>Table List</p>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" href="./typography.html">
-                        <i class="nc-icon nc-paper-2"></i>
-                        <p>Typography</p>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" href="./icons.html">
-                        <i class="nc-icon nc-atom"></i>
-                        <p>Icons</p>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" href="./maps.html">
-                        <i class="nc-icon nc-pin-3"></i>
-                        <p>Maps</p>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" href="./notifications.html">
-                        <i class="nc-icon nc-bell-55"></i>
-                        <p>Notifications</p>
-                    </a>
-                </li>
-                <li class="nav-item active active-pro">
-                    <a class="nav-link active" href="upgrade.html">
-                        <i class="nc-icon nc-alien-33"></i>
-                        <p>Upgrade to PRO</p>
-                    </a>
-                </li>-->
+                </li>             
             </ul>
         </div>
     </div>
@@ -120,12 +149,12 @@
                                     <h6>To track your consignment please enter your Shipment ID provided during booking</h6>
                                 </div>
                                 <div class="card-body">
-                                    <form>
+                                    <form id="trackShipment" method="post">
                                         <div class="row">                                                                                    
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Shipment ID</label>
-                                                    <input type="text" class="form-control" placeholder="Enter your Shipment ID" required>
+                                                    <input type="text" id="shipmentID" name="shipmentID" class="form-control" placeholder="Enter your Shipment ID" required>
                                                 </div>
                                             </div>                                            
                                         </div>                                        
@@ -141,7 +170,7 @@
                             <div class="card table-plain-bg">
                                 <div class="card-header ">
                                     <h4 class="card-title">Shipment Details</h4>
-                                    <p class="card-category">Here is a subtitle for this table</p>
+                                    <p class="card-category">Click on any entry to get more Details</p>
                                 </div>
                                 <div class="card-body table-full-width table-responsive">
                                     <table class="table table-hover">
@@ -161,50 +190,10 @@
                                                 <td>Niger</td>
                                                 <td>Oud-Turnhout</td>
                                                 <td>Sinaai-Waas</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2</td>
-                                                <td>Minerva Hooper</td>
-                                                <td>$23,789</td>
-                                                <td>Curaçao</td>
-                                                <td>Sinaai-Waas</td>
-                                                <td>Sinaai-Waas</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3</td>
-                                                <td>Sage Rodriguez</td>
-                                                <td>$56,142</td>
-                                                <td>Netherlands</td>
-                                                <td>Baileux</td>
-                                                <td>Sinaai-Waas</td>
-                                            </tr>
-                                            <tr>
-                                                <td>4</td>
-                                                <td>Philip Chaney</td>
-                                                <td>$38,735</td>
-                                                <td>Korea, South</td>
-                                                <td>Overland Park</td>
-                                                <td>Sinaai-Waas</td>
-                                            </tr>
-                                            <tr>
-                                                <td>5</td>
-                                                <td>Doris Greene</td>
-                                                <td>$63,542</td>
-                                                <td>Malawi</td>
-                                                <td>Feldkirchen in Kärnten</td>
-                                                <td>Sinaai-Waas</td>
-                                            </tr>
-                                            <tr>
-                                                <td>6</td>
-                                                <td>Mason Porter</td>
-                                                <td>$78,615</td>
-                                                <td>Chile</td>
-                                                <td>Gloucester</td>
-                                                <td>Sinaai-Waas</td>
-                                            </tr>
+                                            </tr>                                            
                                         </tbody>
                                     </table>
-                                </div>
+                                </div>  
                             </div>
                         </div>
                         <!-- Shipment Details card Close -->                      
