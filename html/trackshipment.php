@@ -44,7 +44,7 @@
                 var error_res="";
                    
                 var shipmentID=document.getElementById("shipmentID").value;
-                if(shipmentID.length!=5){
+                if(shipmentID.length!=21){
                     error_res=error_res+"<li>Enter Shipment ID Properly</li>";
                 }
                                 
@@ -55,24 +55,14 @@
                 }
                 else{
 
+                    var send_data= 'shipmentID='+shipmentID;                    
                     $.ajax({
                         type: "POST",
                         url: './queries/trackShipment.php',
-                        data: {formData: formData},
+                        data: send_data,
                         success: function(response)
                         {
-                            alert(response);
-                            var jsonData = JSON.parse(response);
-                            alert(jsonData);
-                            if (jsonData.success == "1")
-                            {
-                                //location.href = 'my_profile.php';
-                                alert('Succeed');
-                            }
-                            else
-                            {
-                                alert('Invalid!');
-                            }
+                            var jsonData = response[0];                            
                         }
                     });
                 }
@@ -165,7 +155,62 @@
                             </div>
                         </div>    
                         
+
                         <!-- Shipment Details card -->
+                        <div class="col-md-12">
+                            <div class="card table-plain-bg">                                
+                                <div class="card-body">                                    
+                                    <div class="row">
+                                        <div class="col-md-12">                                            
+                                            <h4 class="card-title">Shipment Details</h4>
+                                        </div>
+                                        <div class="col-md-3">
+                                            Shipment ID: shipmentID
+                                        </div>
+                                        <div class="col-md-3">
+                                            Status: status
+                                        </div>
+                                        <div class="col-md-3">
+                                            Weight: weight
+                                        </div>
+                                        <div class="col-md-3">
+                                            Content Type: content type
+                                        </div>                                       
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <hr/><h4 class="card-title">Sender Details</h4>
+                                        </div>
+                                        <div class="col-md-4">
+                                            Full Name: Nihal Mukesh Bhovare
+                                        </div>
+                                        <div class="col-md-4">
+                                            Address: Address
+                                        </div>
+                                        <div class="col-md-4">
+                                            Mobile Number: Number
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">                                    
+                                            <hr/><h4 class="card-title">Receiver Details</h4>
+                                        </div>
+                                        <div class="col-md-4">
+                                            Full Name: Nihal Mukesh Bhovare
+                                        </div>
+                                        <div class="col-md-4">
+                                            Address: Address
+                                        </div>
+                                        <div class="col-md-4">
+                                            Mobile Number: Number
+                                        </div>
+                                    </div>                                    
+                                </div>  
+                            </div>
+                        </div>
+                        <!-- Shipment Details card Close -->      
+
+                        <!-- Shipment Events Details card -->
                         <div class="col-md-12">
                             <div class="card table-plain-bg">
                                 <div class="card-header ">
@@ -196,7 +241,7 @@
                                 </div>  
                             </div>
                         </div>
-                        <!-- Shipment Details card Close -->                      
+                        <!-- Shipment Events Details card Close -->                      
                     </div>
                 </div>
             </div>
