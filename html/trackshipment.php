@@ -38,7 +38,8 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-            
+            $("#shipment_details_col").hide();
+            $("#shipment_event_card").hide();            
             $('#trackShipment').submit(function(e) {
                 e.preventDefault();                
                 var error_res="";
@@ -69,6 +70,87 @@
                             }                
                             else{
                                 alert(jsonData.shipment_id);
+                                $("#shipment_details_col").show();
+                                $("#shipment_details_row").empty();
+                                $("#sender_details_row").empty();
+                                $("#receiver_details_row").empty();
+                                
+                                $("#shipment_details_row").append("\
+                                <div class='col-md-12'>\
+                                        <h4 class='card-title'>Shipment Details</h4>\
+                                    </div>\
+                                    <div class='col-md-4'>\
+                                        Shipment ID: "+jsonData.shipment_id+"\
+                                    </div>\
+                                    <div class='col-md-3'>\
+                                        Status: "+jsonData.shipment_status+"\
+                                    </div>\
+                                    <div class='col-md-2'>\
+                                        Weight: "+jsonData.shipment_weight+"\
+                                    </div>\
+                                    <div class='col-md-3'>\
+                                        Content Type: "+jsonData.content_type+"\
+                                    </div>");
+                                    
+                                    $("#sender_details_row").append("\
+                                        <div class='col-md-12'>\
+                                            <hr/><h4 class='card-title'>Sender Details</h4>\
+                                        </div>\
+                                        <div class='col-md-4'>\
+                                            Full Name: "+jsonData.sender_name+"\
+                                        </div>\
+                                        <div class='col-md-4'>\
+                                            Mobile Number: <a href=tel:'"+jsonData.sender_phone+"'>"+jsonData.sender_phone+"</a>\
+                                        </div>\
+                                        <div class='col-md-4'>\
+                                            Address: "+jsonData.sender_city+",   "+ jsonData.sender_state + ", " + jsonData.sender_country + ", " + jsonData.sender_pincode +"\
+                                        </div>\
+                                    ");
+
+                                    $("#receiver_details_row").append("\
+                                        <div class='col-md-12'>\
+                                            <hr/><h4 class='card-title'>Receiver Details</h4>\
+                                        </div>\
+                                        <div class='col-md-4'>\
+                                            Full Name: "+jsonData.receiver_name+"\
+                                        </div>\
+                                        <div class='col-md-4'>\
+                                            Mobile Number: <a href=tel:'"+jsonData.receiver_phone+"'>"+jsonData.receiver_phone+"</a>\
+                                        </div>\
+                                        <div class='col-md-4'>\
+                                            Address: "+jsonData.receiver_city+", "+ jsonData.receiver_state + ", " + jsonData.receiver_country + ", " + jsonData.receiver_pincode +"\
+                                        </div>\
+                                    ");
+
+                                    // New Ajax request to get Events data
+                                    $.ajax({
+                                        type: "POST",
+                                        url: './queries/trackShipment_events.php',
+                                        data: send_data,
+                                        success: function(response)
+                                        {
+                                            var jsonData = response[0];
+                                            //if(jsonData.hasOwnProperty("error_msg")){
+                                            if(jsonData["error_msg"]){
+                                                alert(jsonData.error_msg);
+                                            }                
+                                            else{
+                                                $("#shipment_event_table").empty();
+                                                $("#shipment_event_card").show();
+                                                $("#shipment_event_table").append("\
+                                                    <tr>\
+                                                        <td>"+jsonData.event_date+"</td>\
+                                                        <td>"+jsonData.event_remarks+"</td>\
+                                                        <td>"+jsonData.event_location+"</td>\
+                                                        <td>Niger</td>\
+                                                        <td>Oud-Turnhout</td>\
+                                                        <td>"+jsonData.shipment_status+"</td>\
+                                                    </tr>\
+                                                ");
+                                            }
+                                        }
+                                    });
+                                    // New Ajax request to get Events data
                             }            
                         }
                     });
@@ -163,54 +245,15 @@
                         </div>    
                         
 
-                        <!-- Shipment Details card -->
-                        <div class="col-md-12">
+                        <!-- Shipment Details card -->                    
+                        <div class="col-md-12" id="shipment_details_col">
                             <div class="card table-plain-bg">                                
                                 <div class="card-body">                                    
-                                    <div class="row">
-                                        <div class="col-md-12">                                            
-                                            <h4 class="card-title">Shipment Details</h4>
-                                        </div>
-                                        <div class="col-md-3">
-                                            Shipment ID: shipmentID
-                                        </div>
-                                        <div class="col-md-3">
-                                            Status: status
-                                        </div>
-                                        <div class="col-md-3">
-                                            Weight: weight
-                                        </div>
-                                        <div class="col-md-3">
-                                            Content Type: content type
-                                        </div>                                       
+                                    <div class="row" id="shipment_details_row">                                                                    
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <hr/><h4 class="card-title">Sender Details</h4>
-                                        </div>
-                                        <div class="col-md-4">
-                                            Full Name: Nihal Mukesh Bhovare
-                                        </div>
-                                        <div class="col-md-4">
-                                            Address: Address
-                                        </div>
-                                        <div class="col-md-4">
-                                            Mobile Number: Number
-                                        </div>
+                                    <div class="row" id="sender_details_row">                                    
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-12">                                    
-                                            <hr/><h4 class="card-title">Receiver Details</h4>
-                                        </div>
-                                        <div class="col-md-4">
-                                            Full Name: Nihal Mukesh Bhovare
-                                        </div>
-                                        <div class="col-md-4">
-                                            Address: Address
-                                        </div>
-                                        <div class="col-md-4">
-                                            Mobile Number: Number
-                                        </div>
+                                    <div class="row" id="receiver_details_row">                                        
                                     </div>                                    
                                 </div>  
                             </div>
@@ -218,7 +261,7 @@
                         <!-- Shipment Details card Close -->      
 
                         <!-- Shipment Events Details card -->
-                        <div class="col-md-12">
+                        <div class="col-md-12" id="shipment_event_card">
                             <div class="card table-plain-bg">
                                 <div class="card-header ">
                                     <h4 class="card-title">Shipment Details</h4>
@@ -226,24 +269,16 @@
                                 </div>
                                 <div class="card-body table-full-width table-responsive">
                                     <table class="table table-hover">
-                                        <thead>
-                                            <th>Date</th>
-                                            <th>Activity</th>
-                                            <th>Location</th>
-                                            <th>From</th>
-                                            <th>To</th>
-                                            <th>Status</th>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>1</td>
-                                                <td>Dakota Rice</td>
-                                                <td>$36,738</td>
-                                                <td>Niger</td>
-                                                <td>Oud-Turnhout</td>
-                                                <td>Sinaai-Waas</td>
-                                            </tr>                                            
-                                        </tbody>
+                                    <thead>
+                                        <th>Date</th>
+                                        <th>Activity</th>
+                                        <th>Location</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Status</th>
+                                    </thead>
+                                    <tbody id="shipment_event_table">
+                                    </tbody>
                                     </table>
                                 </div>  
                             </div>
