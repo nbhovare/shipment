@@ -137,16 +137,21 @@
                                             else{
                                                 $("#shipment_event_table").empty();
                                                 $("#shipment_event_card").show();
-                                                $("#shipment_event_table").append("\
-                                                    <tr>\
-                                                        <td>"+jsonData.event_date+"</td>\
-                                                        <td>"+jsonData.event_remarks+"</td>\
-                                                        <td>"+jsonData.event_location+"</td>\
-                                                        <td>Niger</td>\
-                                                        <td>Oud-Turnhout</td>\
-                                                        <td>"+jsonData.shipment_status+"</td>\
-                                                    </tr>\
-                                                ");
+                                                $.each(jsonData,function(indexs,jsonArray){
+                                                    $.each([jsonArray],function(key,val){
+                                                        alert(indexs+val);
+                                                    $("#shipment_event_table").append("\
+                                                        <tr>\
+                                                            <td>"+event_date.val+"</td>\
+                                                            <td>"+indexs.event_remarks+"</td>\
+                                                            <td>"+indexs.event_location+"</td>\
+                                                            <td>Niger</td>\
+                                                            <td>Oud-indexsut</td>\
+                                                            <td>"+indexs.shipment_status+"</td>\
+                                                        </tr>\
+                                                    ");
+                                                });
+                                            });
                                             }
                                         }
                                     });
