@@ -59,17 +59,18 @@
                     var send_data= 'shipmentID='+shipmentID;                    
                     $.ajax({
                         type: "POST",
-                        url: './queries/trackShipment.php',
+                        url: './queries/abc.php',
                         data: send_data,
                         success: function(response)
-                        {
-                            var jsonData = response[0];
+                        {                                   
+                            alert(response);
+                            var jsonData = response.data[0];
                             //if(jsonData.hasOwnProperty("error_msg")){
                             if(jsonData["error_msg"]){
                                 alert(jsonData.error_msg);
                             }                
-                            else{
-                                alert(jsonData.shipment_id);
+                            else{              
+                                                
                                 $("#shipment_details_col").show();
                                 $("#shipment_details_row").empty();
                                 $("#sender_details_row").empty();
@@ -91,6 +92,7 @@
                                     <div class='col-md-3'>\
                                         Content Type: "+jsonData.content_type+"\
                                     </div>");
+                                    // Appeding Data
                                     
                                     $("#sender_details_row").append("\
                                         <div class='col-md-12'>\
@@ -106,6 +108,7 @@
                                             Address: "+jsonData.sender_city+",   "+ jsonData.sender_state + ", " + jsonData.sender_country + ", " + jsonData.sender_pincode +"\
                                         </div>\
                                     ");
+                                    // Appeding Data
 
                                     $("#receiver_details_row").append("\
                                         <div class='col-md-12'>\
@@ -121,41 +124,9 @@
                                             Address: "+jsonData.receiver_city+", "+ jsonData.receiver_state + ", " + jsonData.receiver_country + ", " + jsonData.receiver_pincode +"\
                                         </div>\
                                     ");
+                                    // Appeding Data
 
-                                    // New Ajax request to get Events data
-                                    $.ajax({
-                                        type: "POST",
-                                        url: './queries/trackShipment_events.php',
-                                        data: send_data,
-                                        success: function(response)
-                                        {
-                                            var jsonData = response[0];
-                                            //if(jsonData.hasOwnProperty("error_msg")){
-                                            if(jsonData["error_msg"]){
-                                                alert(jsonData.error_msg);
-                                            }                
-                                            else{
-                                                $("#shipment_event_table").empty();
-                                                $("#shipment_event_card").show();
-                                                $.each(jsonData,function(indexs,jsonArray){
-                                                    $.each([jsonArray],function(key,val){
-                                                        alert(indexs+val);
-                                                    $("#shipment_event_table").append("\
-                                                        <tr>\
-                                                            <td>"+event_date.val+"</td>\
-                                                            <td>"+indexs.event_remarks+"</td>\
-                                                            <td>"+indexs.event_location+"</td>\
-                                                            <td>Niger</td>\
-                                                            <td>Oud-indexsut</td>\
-                                                            <td>"+indexs.shipment_status+"</td>\
-                                                        </tr>\
-                                                    ");
-                                                });
-                                            });
-                                            }
-                                        }
-                                    });
-                                    // New Ajax request to get Events data
+                                    
                             }            
                         }
                     });
