@@ -41,6 +41,8 @@
             $("#shipment_details_col").hide();
             $("#shipment_event_card").hide();            
             $('#trackShipment').submit(function(e) {
+                $("#shipment_details_col").hide();
+                $("#shipment_event_card").hide();
                 e.preventDefault();                
                 var error_res="";
                    
@@ -59,55 +61,56 @@
                     var send_data= 'shipmentID='+shipmentID;                    
                     $.ajax({
                         type: "POST",
-                        url: './queries/abc.php',
+                        url: './queries/trackShipment.php',
                         data: send_data,
                         success: function(response)
-                        {                                   
-                            alert(response);
-                            var jsonData = response.data[0];
-                            //if(jsonData.hasOwnProperty("error_msg")){
-                            if(jsonData["error_msg"]){
-                                alert(jsonData.error_msg);
-                            }                
-                            else{              
-                                                
+                        {
+                            if(response.error_msg){
+                                alert(response.error_msg.error_msg);
+                            }
+                            else{
+
+                                $("#modifyBtn").prop("disabled", false);
+                                $("#deleteBtn").prop("disabled", false);                                
+                                
                                 $("#shipment_details_col").show();
                                 $("#shipment_details_row").empty();
                                 $("#sender_details_row").empty();
                                 $("#receiver_details_row").empty();
-                                
-                                $("#shipment_details_row").append("\
-                                <div class='col-md-12'>\
-                                        <h4 class='card-title'>Shipment Details</h4>\
-                                    </div>\
-                                    <div class='col-md-4'>\
-                                        Shipment ID: "+jsonData.shipment_id+"\
-                                    </div>\
-                                    <div class='col-md-3'>\
-                                        Status: "+jsonData.shipment_status+"\
-                                    </div>\
-                                    <div class='col-md-2'>\
-                                        Weight: "+jsonData.shipment_weight+"\
-                                    </div>\
-                                    <div class='col-md-3'>\
-                                        Content Type: "+jsonData.content_type+"\
-                                    </div>");
-                                    // Appeding Data
+                                // Loop through shipment_data array
+                                $.each(response.shipment_data, function(index, shipment) {                                                                    
                                     
+                                    $("#shipment_details_row").append("\
+                                        <div class='col-md-12'>\
+                                            <h4 class='card-title'>Shipment Details</h4>\
+                                        </div>\
+                                        <div class='col-md-4'>\
+                                            Shipment ID: "+shipment.shipment_id+"\
+                                        </div>\
+                                        <div class='col-md-3'>\
+                                            Status: "+shipment.shipment_status+"\
+                                        </div>\
+                                        <div class='col-md-2'>\
+                                            Weight: "+shipment.shipment_weight+"\
+                                        </div>\
+                                        <div class='col-md-3'>\
+                                            Content Type: "+shipment.content_type+"\
+                                        </div>");
+                                        // Appeding Data
+                                        
                                     $("#sender_details_row").append("\
                                         <div class='col-md-12'>\
                                             <hr/><h4 class='card-title'>Sender Details</h4>\
                                         </div>\
                                         <div class='col-md-4'>\
-                                            Full Name: "+jsonData.sender_name+"\
+                                            Full Name: "+shipment.sender_name+"\
                                         </div>\
                                         <div class='col-md-4'>\
-                                            Mobile Number: <a href=tel:'"+jsonData.sender_phone+"'>"+jsonData.sender_phone+"</a>\
+                                            Mobile Number: <a href=tel:'"+shipment.sender_phone+"'>"+shipment.sender_phone+"</a>\
                                         </div>\
                                         <div class='col-md-4'>\
-                                            Address: "+jsonData.sender_city+",   "+ jsonData.sender_state + ", " + jsonData.sender_country + ", " + jsonData.sender_pincode +"\
-                                        </div>\
-                                    ");
+                                            Address: "+shipment.sender_city+",   "+ shipment.sender_state + ", " + shipment.sender_country + ", " + shipment.sender_pincode +"\
+                                        </div>");
                                     // Appeding Data
 
                                     $("#receiver_details_row").append("\
@@ -115,19 +118,36 @@
                                             <hr/><h4 class='card-title'>Receiver Details</h4>\
                                         </div>\
                                         <div class='col-md-4'>\
-                                            Full Name: "+jsonData.receiver_name+"\
+                                            Full Name: "+shipment.receiver_name+"\
                                         </div>\
                                         <div class='col-md-4'>\
-                                            Mobile Number: <a href=tel:'"+jsonData.receiver_phone+"'>"+jsonData.receiver_phone+"</a>\
+                                            Mobile Number: <a href=tel:'"+shipment.receiver_phone+"'>"+shipment.receiver_phone+"</a>\
                                         </div>\
                                         <div class='col-md-4'>\
-                                            Address: "+jsonData.receiver_city+", "+ jsonData.receiver_state + ", " + jsonData.receiver_country + ", " + jsonData.receiver_pincode +"\
-                                        </div>\
-                                    ");
+                                            Address: "+shipment.receiver_city+", "+ shipment.receiver_state + ", " + shipment.receiver_country + ", " + shipment.receiver_pincode +"\
+                                        </div>");
                                     // Appeding Data
-
                                     
-                            }            
+                                });
+
+                                //Extracting Events Data
+                                $("#shipment_event_table").empty();
+                                $("#shipment_event_card").show();
+                                $("#shipment_event_table").show();
+                                $.each(response.events_data, function(index, event) {
+                                    
+                                        $("#shipment_event_table").append("abc\
+                                        <tr>\
+                                            <td>"+event.event_date+"</td>\
+                                            <td>"+event.event_remarks+"</td>\
+                                            <td>"+event.event_location+"</td>\
+                                            <td>Niger</td>\
+                                            <td>Oud-indexsut</td>\
+                                            <td>"+event.shipment_status+"</td>\
+                                        </tr>");
+                                });
+                                    
+                            }
                         }
                     });
                 }   
@@ -143,12 +163,7 @@
  <!-- Mini Modal -->
  <div class="modal fade  modal-primary" id="error_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <!--<div class="modal-header justify-content-center">
-                <div class="modal-profile">
-                    <i class="nc-icon nc-bulb-63"></i>
-                </div>
-            </div>-->
+        <div class="modal-content">            
             <div class="modal-body text-center">
                 <p>Resolve below error before submitting the form</p>
                 <p id="modal_message"></p>
@@ -162,36 +177,18 @@
 <!--  End Modal -->
     <div class="wrapper">
 
-       <!-- SideBar -->
-       <div class="sidebar" data-image="../assets/img/sidebar-5.jpg">
-        <!--
-    Tip 1: You can change the color of the sidebar using: data-color="purple | blue | green | orange | red"
 
-    Tip 2: you can also add an image using data-image tag
--->
-        <div class="sidebar-wrapper">
-            <div class="logo">
-                <a href="index.html" class="simple-text">
-                    Blue Express
-                </a>
-            </div>
-            <ul class="nav">
-                <li class="nav-item active">
-                    <a class="nav-link" href="index.html">
-                        <i class="nc-icon nc-chart-pie-35"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>             
-            </ul>
-        </div>
-    </div>
-    <!-- SideBar -->        
+        <?php
+            include("./includes/sidebar.php");
+        ?>
+        
+
     <div class="main-panel">
-    <?php
+        <?php
 
-        include("./includes/navbar.php");
+            include("./includes/navbar.php");
 
-    ?>
+        ?>
 
             <!-- Main Content -->
             <div class="content">
@@ -211,9 +208,15 @@
                                                     <label>Shipment ID</label>
                                                     <input type="text" id="shipmentID" name="shipmentID" class="form-control" placeholder="Enter your Shipment ID" required>
                                                 </div>
-                                            </div>                                            
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                <button type="submit" class="btn btn-info btn-fill" style="margin:1px">Track</button>
+                                                <button class="btn btn-fill" id="modifyBtn" style="margin:1px" disabled>Modify</button>
+                                                <button class="btn btn-warning btn-fill" id="deleteBtn" style="margin:1px" disabled>Delete</button>
+                                                </div>
+                                            </div>
                                         </div>                                        
-                                        <button type="submit" class="btn btn-info btn-fill pull-right">Track</button>
                                         <div class="clearfix"></div>
                                     </form>
                                 </div>
@@ -246,7 +249,7 @@
                                 <div class="card-body table-full-width table-responsive">
                                     <table class="table table-hover">
                                     <thead>
-                                        <th>Date</th>
+                                        <th>Date (Year/Month/Date)</th>
                                         <th>Activity</th>
                                         <th>Location</th>
                                         <th>From</th>
@@ -264,125 +267,11 @@
                 </div>
             </div>
             <!-- Main Content Close -->
-            <!-- Footer 
-            <footer class="footer">
-                <div class="container-fluid">
-                    <nav>
-                        <ul class="footer-menu">
-                            <li>
-                                <a href="#">
-                                    Home
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#">
-                                    Company
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#">
-                                    Portfolio
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#">
-                                    Blog
-                                </a>
-                            </li>
-                        </ul>
-                        <p class="copyright text-center">
-                            ©
-                            <script>
-                                document.write(new Date().getFullYear())
-                            </script>
-                            <a href="http://www.creative-tim.com">Creative Tim</a>, made with love for a better web
-                        </p>
-                    </nav>
-                </div>
-            </footer>-->
-
+            <!-- Footer -->        
             <!-- Footer -->
         </div>
     </div>
-    <!--   -->
-    <!-- <div class="fixed-plugin">
-    <div class="dropdown show-dropdown">
-        <a href="#" data-toggle="dropdown">
-            <i class="fa fa-cog fa-2x"> </i>
-        </a>
-
-        <ul class="dropdown-menu">
-			<li class="header-title"> Sidebar Style</li>
-            <li class="adjustments-line">
-                <a href="javascript:void(0)" class="switch-trigger">
-                    <p>Background Image</p>
-                    <label class="switch">
-                        <input type="checkbox" data-toggle="switch" checked="" data-on-color="primary" data-off-color="primary"><span class="toggle"></span>
-                    </label>
-                    <div class="clearfix"></div>
-                </a>
-            </li>
-            <li class="adjustments-line">
-                <a href="javascript:void(0)" class="switch-trigger background-color">
-                    <p>Filters</p>
-                    <div class="pull-right">
-                        <span class="badge filter badge-black" data-color="black"></span>
-                        <span class="badge filter badge-azure" data-color="azure"></span>
-                        <span class="badge filter badge-green" data-color="green"></span>
-                        <span class="badge filter badge-orange" data-color="orange"></span>
-                        <span class="badge filter badge-red" data-color="red"></span>
-                        <span class="badge filter badge-purple active" data-color="purple"></span>
-                    </div>
-                    <div class="clearfix"></div>
-                </a>
-            </li>
-            <li class="header-title">Sidebar Images</li>
-
-            <li class="active">
-                <a class="img-holder switch-trigger" href="javascript:void(0)">
-                    <img src="../assets/img/sidebar-1.jpg" alt="" />
-                </a>
-            </li>
-            <li>
-                <a class="img-holder switch-trigger" href="javascript:void(0)">
-                    <img src="../assets/img/sidebar-3.jpg" alt="" />
-                </a>
-            </li>
-            <li>
-                <a class="img-holder switch-trigger" href="javascript:void(0)">
-                    <img src="..//assets/img/sidebar-4.jpg" alt="" />
-                </a>
-            </li>
-            <li>
-                <a class="img-holder switch-trigger" href="javascript:void(0)">
-                    <img src="../assets/img/sidebar-5.jpg" alt="" />
-                </a>
-            </li>
-
-            <li class="button-container">
-                <div class="">
-                    <a href="http://www.creative-tim.com/product/light-bootstrap-dashboard" target="_blank" class="btn btn-info btn-block btn-fill">Download, it's free!</a>
-                </div>
-            </li>
-
-            <li class="header-title pro-title text-center">Want more components?</li>
-
-            <li class="button-container">
-                <div class="">
-                    <a href="http://www.creative-tim.com/product/light-bootstrap-dashboard-pro" target="_blank" class="btn btn-warning btn-block btn-fill">Get The PRO Version!</a>
-                </div>
-            </li>
-
-            <li class="header-title" id="sharrreTitle">Thank you for sharing!</li>
-
-            <li class="button-container">
-				<button id="twitter" class="btn btn-social btn-outline btn-twitter btn-round sharrre"><i class="fa fa-twitter"></i> · 256</button>
-                <button id="facebook" class="btn btn-social btn-outline btn-facebook btn-round sharrre"><i class="fa fa-facebook-square"></i> · 426</button>
-            </li>
-        </ul>
-    </div>
-</div>
- -->
+    
 </body>
 <!--   Core JS Files   -->
 <script src="../assets/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>

@@ -35,30 +35,9 @@
 
 <body>
     <div class="wrapper">
-        <!-- SideBar -->
-        <div class="sidebar" data-image="../assets/img/sidebar-5.jpg">
-            <!--
-        Tip 1: You can change the color of the sidebar using: data-color="purple | blue | green | orange | red"
-
-        Tip 2: you can also add an image using data-image tag
-    -->
-    <div class="sidebar-wrapper">
-                <div class="logo">
-                    <a href="index.html" class="simple-text">
-                        Blue Express
-                    </a>
-                </div>
-                <ul class="nav">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="index.html">
-                            <i class="nc-icon nc-chart-pie-35"></i>
-                            <p>Dashboard</p>
-                        </a>
-                    </li>                      
-                </ul>
-            </div>
-        </div>
-        <!-- SideBar -->       
+        <?php
+            include("./includes/sidebar.php");
+        ?> 
         <div class="main-panel">
             
         <?php
