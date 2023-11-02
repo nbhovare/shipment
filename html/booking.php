@@ -48,6 +48,7 @@
             $('#bookShipment').submit(function(e) {
                 e.preventDefault();
                 var formData = $('#bookShipment').serializeArray();
+                
                 var error_res="";
                                                 
                 if(formData.find(field => field.name === "sender_phone").value.length!=10){
@@ -66,15 +67,19 @@
                     error_res=error_res+"<li>Enter Receiver Pincode Properly</li>";
                 }
 
-                if(formData.find(field => field.name === "delivery_method").value==="Select Delivery Method"){
+                if(formData.find(field => field.name === "shipment_delivery_method").value==="Select Delivery Method"){
                     error_res=error_res+"<li>Select Shipment Method Properly</li>";
                 }
 
+                if(formData.find(field => field.name === "shipment_type").value==="Select Shipment Type"){
+                    error_res=error_res+"<li>Select Shipment Type Properly</li>";
+                }
+                
                 if(formData.find(field => field.name === "content_type").value==="Select Content Type"){
                     error_res=error_res+"<li>Select Shipment Content Type Properly</li>";
                 }
 
-                if(formData.find(field => field.name === "payment_mode").value==="Select Payment Method"){
+                if(formData.find(field => field.name === "payment_type").value==="Select Payment Method"){
                     error_res=error_res+"<li>Select Payment Method Properly</li>";
                 }
                
@@ -85,28 +90,34 @@
                 }
                 else{
 
-                /*$.each(formData, function(i, field){
-                    $("#xx").append(field.name + ":" + field.value + " ");
-                });*/
+                    // Serialize the form data using jQuery                    
 
+                    // Convert the serialized form data to a JSON object
+                    var formDataObject = {};
+                    $.each(formData, function(index, field) {
+                        formDataObject[field.name] = field.value;
+                    });
+
+                    // Convert the JSON object to a JSON string
+                    var formDataJSON = JSON.stringify(formDataObject);
+                                                     
                     $.ajax({
                         type: "POST",
                         url: './queries/bookShipment.php',
-                        data: {formData: formData},                    
+                        data:  {data: formDataJSON},
                         success: function(response)
-                        {
-                            alert(response);
-                            var jsonData = JSON.parse(response);
-                            alert(jsonData);
-                            if (jsonData.success == "1")
-                            {
-                                //location.href = 'my_profile.php';
-                                alert('Succeed');
-                            }2
-                            else
-                            {
-                                alert('Invalid!');
+                        {                                                        
+                            var responseData = JSON.parse(response);
+                            if(response.error_msg){
+                                alert(responseData[0].error_msg);
                             }
+                            else{
+                                alert(responseData[0].shipment_id);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Ajax request failed with status: " + status + " and error: " + error);
+                            // You can provide a more user-friendly error message or handle errors as needed.
                         }
                     });
                 }
@@ -188,8 +199,13 @@
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="form-group">
-                                                    <label>Shipment Type <span style="color:red;font-weight:bold">*</span></label>
-                                                    <input type="text" id="shipment_type" name="shipment_type" class="form-control" placeholder="Enter Shipment Type" required>
+                                                    <label>Shipment Type <span style="color:red;font-weight:bold">*</span></label>                                                                                                        
+                                                    <select class="form-control" id="shipment_type" name="shipment_type" required>
+                                                        <option value="Select Shipment Type">Select Shipment Type</option>
+                                                        <option value="BASIC">Basic</option>
+                                                        <option value="STANDARD">Standard</option>                                                        
+                                                        <option value="PREMIUM">Premium</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
@@ -201,11 +217,11 @@
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Shipment Delivery Method <span style="color:red;font-weight:bold">*</span></label>
-                                                    <select class="form-control" id="delivery_method" name="delivery_method" required>
+                                                    <select class="form-control" id="shipment_delivery_method" name="shipment_delivery_method" required>
                                                         <option value="Select Delivery Method">Select Delivery Method</option>
-                                                        <option value="Ground">Ground</option>
-                                                        <option value="Air">Air</option>                                                        
-                                                        <option value="Water">Water</option>
+                                                        <option value="GND">Ground</option>
+                                                        <option value="AIR">Air</option>                                                        
+                                                        <option value="WATER">Water</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -214,9 +230,9 @@
                                                     <label>Shipment Content Type <span style="color:red;font-weight:bold">*</span></label>
                                                     <select class="form-control" id="content_type" name="content_type" required>
                                                         <option value="Select Shipment Content Type">Select Content Type</option>
-                                                        <option value="Documents">Documents</option>
-                                                        <option value="Food">Food Items/option>
-                                                        <option value="Fragile">Fragile Items</option>
+                                                        <option value="DOCUMENTS">Documents</option>
+                                                        <option value="FOOD">Food Items</option>
+                                                        <option value="FRAGILE">Fragile Items</option>
                                                         <!-- Add more options as needed -->
                                                     </select>
                                                 </div>
@@ -232,13 +248,14 @@
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Booking Date <span style="color:red;font-weight:bold">*</span></label>
-                                                    <input type="datetime-local" id="booking_date" name="booking_date" class="form-control" required>
+                                                    <input type="date" id="booking_date" name="booking_date" class="form-control" required>
+                                                    <!--<input type="datetime-local" id="booking_date" name="booking_date" class="form-control" required>-->
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>Shipment Additional Information <span style="color:red;font-weight:bold">(Optional)</span></label>
-                                                    <textarea class="form-control" rows="5" id="add_info" name="add_info" placeholder="Enter Additional Information"></textarea>
+                                                    <textarea class="form-control" rows="5" id="additional_information" name="additional_information" placeholder="Enter Additional Information"></textarea>
                                                 </div>
                                             </div>
                                         </div>                                        
@@ -262,7 +279,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="sender_full_name">Sender Full Name: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control"  id="sender_full_name" name="sender_full_name" placeholder="Sender's Full Name" required>
+                                                <input type="text" class="form-control"  id="sender_name" name="sender_name" placeholder="Sender's Full Name" required>
                                             </div>
                                         </div>                                        
                                         
@@ -300,7 +317,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="sender_state">Sender State: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                <select name="state" id="sender_state" name="sender_state" class="form-control" required>
+                                                <select id="sender_state" name="sender_state" class="form-control" required>
                                                     <option value="Andhra Pradesh">Select State</option>
                                                     <option value="Andhra Pradesh">Andhra Pradesh</option>
                                                     <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
@@ -621,7 +638,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_full_name">Receiver Full Name: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control"  id="Receiver_full_name" name="Receiver_full_name" placeholder="Receiver's Full Name" required>
+                                                <input type="text" class="form-control"  id="Receiver_name" name="Receiver_name" placeholder="Receiver's Full Name" required>
                                             </div>
                                         </div>                                        
                                         
@@ -658,7 +675,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_state">Receiver State: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                <select name="state" id="receiver_state" name="receiver_state" class="form-control" required>
+                                                <select id="receiver_state" name="receiver_state" class="form-control" required>
                                                     <option value="Andhra Pradesh">Select State</option>
                                                     <option value="Andhra Pradesh">Andhra Pradesh</option>
                                                     <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
@@ -980,7 +997,7 @@
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Payment Mode <span style="color:red;font-weight:bold">*</span></label>
-                                                    <select class="form-control" name="payment_mode" id="payment_mode" required>
+                                                    <select class="form-control" name="payment_type" id="payment_type" required>
                                                         <option >Select Payment Method</option>
                                                         <option value="Online At Booking">Online - At Booking</option>
                                                         <option value="Offline - At Booking">Offline - At Booking</option>                                                        

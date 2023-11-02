@@ -7,6 +7,7 @@
         $shipmentID = $_POST ['shipmentID'];
         
         $query = "SELECT * FROM shipment_details WHERE shipment_id='".$shipmentID."'";
+        echo $query;
         $execute_query = mysqli_query($connection, $query);
         if ($execute_query) {               
             if(mysqli_num_rows($execute_query)>0){
