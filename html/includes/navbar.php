@@ -18,10 +18,15 @@
                                 <div class="divider"></div>
                                 <a class="dropdown-item" href="#">More Options</a>
                             </div>
-                        </li>
-                        <li class="nav-item">
+                        </li>                        
+                        <!--<li class="nav-item">
                             <a class="nav-link" href="#">
                                 <span class="no-icon">Your Account</span>
+                            </a>
+                        </li>-->
+                        <li class="nav-item">
+                            <a class="nav-link" href="./queries/deauth.php">
+                                <span class="no-icon">Logout</span>
                             </a>
                         </li>
                         

@@ -1,3 +1,12 @@
+<?php
+
+    session_start();
+    if(!isset($_SESSION['isSession'])){
+        header("location:./login.php");
+    }
+
+?>
+
 <!-- 
 =========================================================
  Light Bootstrap Dashboard - v2.0.1

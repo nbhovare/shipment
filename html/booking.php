@@ -1,7 +1,11 @@
 <?php
-    include "./includes/db_conn";
-?>
 
+    session_start();
+    if(!isset($_SESSION['isSession'])){
+        header("location:./login.php");
+    }
+
+?>
 
 
 
