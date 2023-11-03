@@ -12,8 +12,9 @@
             $formData = json_decode($jsonData, true);
 
             if ($formData !== null) {
-
-                $shipmentIDToInsert="BXP-".$formData["shipment_delivery_method"]."-MH-MP-".mt_rand(10000, 99999);
+                                
+                //$shipmentIDToInsert="BXP-".$formData["shipment_delivery_method"]."-MH-MP-".mt_rand(10000, 99999);
+                $shipmentIDToInsert="BXP".$formData["shipment_delivery_method"]."-".mt_rand(10000, 99999);
                 
                 $create_by_admin_id=0;
                 $toFields="shipment_id,create_by_admin_id,tracking_id";
@@ -28,9 +29,9 @@
                 }
                 
                 // Code to insert into database
-                $insertIntoDatabase = "INSERT INTO shipment_details (".$toFields.") VALUES (".$toValues.")";
-                
-                $execute_query = mysqli_query($connection, $insertIntoDatabase);
+                $insertIntoDatabase = "INSERT INTO shipment_details (".$toFields.") VALUES (".$toValues.")";                
+                                
+                $execute_query = mysqli_query($connection, $insertIntoDatabase);                
                                 
                 if ($execute_query) {                    
                     $return_data=array(
@@ -48,27 +49,7 @@
                     echo json_encode($return_data);
                 }
                 
-                // Code to insert into database
-                    /*if ($conn->query($sql) === TRUE) {
-                        echo "Data inserted successfully.";
-                    }
-                    else {
-                        echo "Error: " . $sql . "<br>" . $conn->error;
-                    }*/        
-       
-
-                    /*echo " INSERT INTO your_table_name (
-                        additional_information,booking_date,carrier_id,content_type,create_by_admin_id,event_id,payment_type,receiver_add_info_landmark,
-                        receiver_address,receiver_city,receiver_country,receiver_email,receiver_name,receiver_phone,receiver_pincode,
-                        receiver_state,sender_address,sender_city,sender_country,sender_email,sender_name,sender_phone,sender_pincode,sender_state,shipment_cost) 
-                        
-                        VALUES (
-                        '$additional_information','$booking_date','$carrier_id','$content_type',$create_by_admin_id,
-                        $event_id,'$payment_type','$receiver_add_info_landmark','$receiver_address','$receiver_city','$receiver_country',
-                        '$receiver_email','$receiver_name','$receiver_phone','$receiver_pincode','$receiver_state','$sender_address','$sender_city',
-                        '$sender_country','$sender_email','$sender_name','$sender_phone','$sender_pincode','$sender_state',$shipment_cost
-                    );";
-                    // Code to insert into database      
+                   
                                         
                     /*if ($key !== array_key_last($formData)) {
                         

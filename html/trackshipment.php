@@ -38,6 +38,23 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            $("#clearBtn").click(function(){
+                $("#trackShipment").trigger("reset");
+                $("#shipment_details_col").hide();
+                $("#shipment_details_row").empty();
+                $("#sender_details_row").empty();
+                $("#receiver_details_row").empty();
+
+                $("#shipment_event_card").hide();
+                $("#shipment_event_table").empty();
+
+                $("#clearBtn").prop("disabled", true);
+                $("#modifyBtn").prop("disabled", true);
+                $("#deleteBtn").prop("disabled", true);
+
+            })
+
             $("#shipment_details_col").hide();
             $("#shipment_event_card").hide();            
             $('#trackShipment').submit(function(e) {
@@ -47,7 +64,7 @@
                 var error_res="";
                    
                 var shipmentID=document.getElementById("shipmentID").value;
-                if(shipmentID.length!=21){
+                if(shipmentID.length!=12){
                     error_res=error_res+"<li>Enter Shipment ID Properly</li>";
                 }
                                 
@@ -70,6 +87,7 @@
                             }
                             else{
 
+                                $("#clearBtn").prop("disabled", false);
                                 $("#modifyBtn").prop("disabled", false);
                                 $("#deleteBtn").prop("disabled", false);                                
                                 
@@ -212,6 +230,7 @@
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                 <button type="submit" class="btn btn-info btn-fill" style="margin:1px">Track</button>
+                                                <button type="button" class="btn btn-info btn-fill" id="clearBtn" style="margin:1px"disabled>Clear</button>                                                
                                                 <button class="btn btn-fill" id="modifyBtn" style="margin:1px" disabled>Modify</button>
                                                 <button class="btn btn-warning btn-fill" id="deleteBtn" style="margin:1px" disabled>Delete</button>
                                                 </div>

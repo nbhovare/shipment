@@ -75,7 +75,7 @@
                     error_res=error_res+"<li>Select Shipment Type Properly</li>";
                 }
                 
-                if(formData.find(field => field.name === "content_type").value==="Select Content Type"){
+                if(formData.find(field => field.name === "content_type").value==="Select Shipment Content Type"){
                     error_res=error_res+"<li>Select Shipment Content Type Properly</li>";
                 }
 
@@ -99,7 +99,7 @@
                     });
 
                     // Convert the JSON object to a JSON string
-                    var formDataJSON = JSON.stringify(formDataObject);
+                    var formDataJSON = JSON.stringify(formDataObject);                    
                                                      
                     $.ajax({
                         type: "POST",
@@ -221,7 +221,7 @@
                                                         <option value="Select Delivery Method">Select Delivery Method</option>
                                                         <option value="GND">Ground</option>
                                                         <option value="AIR">Air</option>                                                        
-                                                        <option value="WATER">Water</option>
+                                                        <option value="SEA">Water</option>
                                                     </select>
                                                 </div>
                                             </div>
