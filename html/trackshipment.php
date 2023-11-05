@@ -48,6 +48,11 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
+            $("#modifyBtn").click(function(){
+                var shipmentID=$("#shipmentID").val();
+                window.location.href="./update.php?shipID="+shipmentID;
+            })
+
             $("#clearBtn").click(function(){
                 $("#trackShipment").trigger("reset");
                 $("#shipment_details_col").hide();

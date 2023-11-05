@@ -14,16 +14,16 @@
                             <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                                 <a class="dropdown-item" href="booking.php">Book Shipment</a>
                                 <a class="dropdown-item" href="trackshipment.php">Track/Modify Shipment</a>
-                                <a class="dropdown-item" href="#">Reports</a>
+                                <a class="dropdown-item" href="reports.php">Reports</a>
                                 <div class="divider"></div>
                                 <a class="dropdown-item" href="#">More Options</a>
                             </div>
                         </li>                        
-                        <!--<li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link" href="#">
                                 <span class="no-icon">Your Account</span>
                             </a>
-                        </li>-->
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="./queries/deauth.php">
                                 <span class="no-icon">Logout</span>
@@ -35,3 +35,4 @@
             </div>
         </nav>
     <!-- End Navbar -->
+    

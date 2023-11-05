@@ -66,7 +66,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-        }
+        }        
     </style>
 
         <script>
@@ -121,7 +121,10 @@
         </script>
 </head>
 
-<body>
+<body style='background: linear-gradient(to right, 
+  rgba(0, 0, 255, 0.5), /* Blue with 50% transparency */
+  rgba(255, 0, 0, 0.5)   /* Red with 50% transparency */
+);'>
                      
 
             <div class="content">
@@ -138,11 +141,11 @@
                                         <div class="col-md-12">
                                             <form id="loginForm" method="POST">
                                                 <div class="form-group">
-                                                    <label>Email Address</label>
+                                                    <label><b>Email Address</b></label>
                                                     <input type="email" id="username" name="username" class="form-control" placeholder="Enter Rrgistsred email address" required>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label>Password</label>
+                                                    <label><b>Password</b></label>
                                                     <input type="password" id="password" name="password" class="form-control" placeholder="Enter Password" required>
                                                 </div>
                                                 <table>

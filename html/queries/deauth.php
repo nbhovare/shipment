@@ -10,6 +10,8 @@
         
         // Destroy the session
         session_destroy();
+
+        header("location:../login.php");
     }
 
     // Redirect to a logout confirmation page or any other destination
