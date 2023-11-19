@@ -4,23 +4,6 @@
     if(!isset($_SESSION['isSession'])){
         header("location:./login.php");
     }
-    else{        
-
-        // Check if current user is admin If not redirect else do nothing and allow
-        if($_SESSION['type']!="ADMIN"){
-            header("location:./index.php");
-        }
-        else{
-            $shipmentID="";
-
-            if(!isset($_GET["shipID"])){                
-                header("location:./index.php");
-            }
-            else{
-                $shipmentID=$_GET["shipID"];        
-            }
-        }
-    }    
 
 ?>
 
@@ -49,7 +32,7 @@
     <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
     <link rel="icon" type="image/png" href="../assets/img/favicon.ico">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <title>Update Shipment</title>
+    <title>Book Shipment</title>
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
     <!--     Fonts and icons     -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
@@ -65,46 +48,10 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-            var send_data= "shipmentID=<?php echo $shipmentID; ?>";
-            $.ajax({
-                type: "POST",
-                url: './queries/trackShipment.php',
-                data:  send_data,            
-                success: function(response)
-                {
-                    if(response.error_msg){
-                        alert(response.error_msg.error_msg);
-                    }
-                    else{
-                        var ids = {};
-                        // Get all the form elements into an array...
-                        var $formElements = $('#trackShipment :input');
-
-                        // An object to store IDs and names...
-                        $formElements.each(function (index) {
-                            // For debugging purposes...                                
-                            ids[$(this).attr('name')] = $(this).attr('id');
-                        });                            
-                        // Get all the form elements into an array...
-                        $.each(response.shipment_data[0], function(index, shipment) {
-                                                          
-                            if (ids.hasOwnProperty(index)) {
-                                // Set the value for the input with ID "shipmentID"                                
-                                $("#" + ids[index]).val(shipment);
-                            }                        
-                        });
-                        console.log(ids)
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.log("Ajax request failed with status: " + status + " and error: " + error);
-                    // You can provide a more user-friendly error message or handle errors as needed.
-                }
-            });
-                       
-            $('#trackShipment').submit(function(e) {
+            
+            $('#bookShipment').submit(function(e) {
                 e.preventDefault();
-                var formData = $('#trackShipment').serializeArray();
+                var formData = $('#bookShipment').serializeArray();
                 
                 var error_res="";
                                                 
@@ -160,7 +107,7 @@
                                                      
                     $.ajax({
                         type: "POST",
-                        url: './queries/updateShipment.php',
+                        url: './queries/bookShipment.php',
                         data:  {data: formDataJSON},
                         success: function(response)
                         {                                                        
@@ -248,18 +195,12 @@
                             <div class="card-body">
                                 <div class="card table-plain-bg">
                                     <div class="card-header ">
-                                        <h4 class="card-title">Update Shipment</h4>
-                                        <p class="card-category">Update Shipment Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
+                                        <h4 class="card-title">Book Shipment</h4>
+                                        <p class="card-category">Enter Shipment Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
                                     </div>
                                 <div class="card-body">
-                                    <form id="trackShipment" method="post">
+                                    <form id="bookShipment" method="post">
                                         <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label>Shipment ID <span style="color:red;font-weight:bold">*</span></label>                                                                                                        
-                                                    <input type="text" id="shipmentID" name="shipmentID" class="form-control"  value="<?php echo $_GET['shipID']?>" required disabled>
-                                                </div>
-                                            </div>
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Shipment Type <span style="color:red;font-weight:bold">*</span></label>                                                                                                        
@@ -287,10 +228,8 @@
                                                         <option value="SEA">Water</option>
                                                     </select>
                                                 </div>
-                                            </div>                                            
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-4">
+                                            </div>
+                                            <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Shipment Content Type <span style="color:red;font-weight:bold">*</span></label>
                                                     <select class="form-control" id="content_type" name="content_type" required>
@@ -302,13 +241,15 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Shipment Cost (In Rupees) <span style="color:red;font-weight:bold">*</span></label>
                                                     <input type="number" id="shipment_cost" name="shipment_cost" class="form-control" placeholder="Enter Shipment Cost" required>
                                                 </div>
                                             </div>                                            
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Booking Date <span style="color:red;font-weight:bold">*</span></label>
                                                     <input type="date" id="booking_date" name="booking_date" class="form-control" required>
@@ -334,7 +275,7 @@
                                 <div class="card table-plain-bg">
                                     <div class="card-header ">
                                         <h4 class="card-title">Sender Information</h4>
-                                        <p class="card-category">Update Sender Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
+                                        <p class="card-category">Enter Sender Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
                                     </div>
                                 <div class="card-body">
                                     
@@ -693,7 +634,7 @@
                                 <div class="card table-plain-bg">
                                     <div class="card-header ">
                                         <h4 class="card-title">Receiver Information</h4>
-                                        <p class="card-category">Update Receiver Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
+                                        <p class="card-category">Enter Receiver Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
                                     </div>
                                 <div class="card-body">
                                     
@@ -701,28 +642,28 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_full_name">Receiver Full Name: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control"  id="receiver_name" name="receiver_name" placeholder="Receiver's Full Name" required>
+                                                <input type="text" class="form-control"  id="Receiver_name" name="Receiver_name" placeholder="Receiver's Full Name" required>
                                             </div>
                                         </div>                                        
                                         
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_email">Receiver Email: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="email" class="form-control"  id="receiver_email" name="receiver_email" placeholder="Receiver's Email" required>
+                                                <input type="email" class="form-control"  id="Receiver_email" name="Receiver_email" placeholder="Receiver's Email" required>
                                             </div> 
                                         </div>
                                         
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_phone">Receiver Phone Number: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="tel" class="form-control"  id="receiver_phone" name="receiver_phone" placeholder="Receiver's Phone Number" maxlength="10" required>
+                                                <input type="tel" class="form-control"  id="Receiver_phone" name="Receiver_phone" placeholder="Receiver's Phone Number" maxlength="10" required>
                                             </div>
                                         </div>
 
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_address">Receiver Address: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control"  id="receiver_address" name="receiver_address" placeholder="Receiver's Address" required>
+                                                <input type="text" class="form-control"  id="Receiver_address" name="Receiver_address" placeholder="Receiver's Address" required>
                                             </div>
                                         </div>
                                     </div>
@@ -731,7 +672,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="Receiver_city">Receiver City: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control"  id="receiver_city" name="receiver_city" placeholder="Receiver's City" required>
+                                                <input type="text" class="form-control"  id="Receiver_city" name="Receiver_city" placeholder="Receiver's City" required>
                                             </div>
                                         </div>
                                         
@@ -1052,7 +993,7 @@
                                 <div class="card table-plain-bg">
                                     <div class="card-header ">
                                         <h4 class="card-title">Payment Details</h4>
-                                        <p class="card-category">Update payment Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
+                                        <p class="card-category">Enter payment Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
                                     </div>
                                 <div class="card-body">
                                     
@@ -1069,7 +1010,7 @@
                                                 </div>
                                             </div>                                            
                                         </div>
-                                        <button type="submit" class="btn btn-info btn-fill pull-right">Update</button>
+                                        <button type="submit" class="btn btn-info btn-fill pull-right">Submit</button>
                                     </form>
                                 </div>
                             </div>   

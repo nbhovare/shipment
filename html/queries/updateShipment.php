@@ -12,26 +12,30 @@
             $formData = json_decode($jsonData, true);
 
             if ($formData !== null) {
-                                
-                //$shipmentIDToInsert="BXP-".$formData["shipment_delivery_method"]."-MH-MP-".mt_rand(10000, 99999);
-                $shipmentIDToInsert="BXP".$formData["shipment_delivery_method"]."-".mt_rand(10000, 99999);
-                
+                                                                                                
                 $create_by_admin_id=0;
-                $toFields="shipment_id,create_by_admin_id,tracking_id";
-                $toValues="'".$shipmentIDToInsert."','".$create_by_admin_id."','".$shipmentIDToInsert."'";
-                
+                $toupdate="";                
+                $shipment_id="";
+
+                $lastKey = end(array_keys($formData)); // Get the last key in the array
+
                 // Loop through the associative array
                 foreach ($formData as $key => $value) {
                     // $key represents the form field name, and $value represents the form field value
-
-                    $toFields=$toFields.",".$key;
-                    $toValues=$toValues.",'".$value."'";
-                }
+                    if($key==="shipment_id"){
+                        $shipment_id=$value;
+                    }
+                    else{
+                        $toupdate=$toupdate.$key."='".$value."'";
+                        $toupdate=$toupdate.(($key === $lastKey)?"":",");
+                        // Check if the current key is the last key if not append , (Comma) to add more values which needs to be updated
+                    } 
+                }                
                 
                 // Code to insert into database
-                $insertIntoDatabase = "INSERT INTO shipment_details (".$toFields.") VALUES (".$toValues.")";                
+                $insertIntoDatabase = "update shipment_details set ".$toupdate." where shipment_id='".$shipment_id."'";                
                                 
-                $execute_query = mysqli_query($connection, $insertIntoDatabase);                
+                /*$execute_query = mysqli_query($connection, $insertIntoDatabase);                
                                 
                 if ($execute_query) {                    
                     $return_data=array(

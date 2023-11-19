@@ -29,6 +29,7 @@
                     $_SESSION['user_id'] = $dataFromDB['user_id'];
                     $_SESSION['type'] = $dataFromDB['type'];
                     $_SESSION['status'] = $dataFromDB['status'];
+                    $_SESSION['facility_id'] = $dataFromDB['facility_id'];
 
                     $ret_msg="1";
 
