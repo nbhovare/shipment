@@ -82,10 +82,50 @@
                 $("#loginForm").submit(function(e){
                     e.preventDefault();
 
-                    // Prepare Data                                                            
+                    // some other
+
+                    var username = $('#username').val(); // Assuming your username field has an ID of 'usernameField'
+    var password = $('#password').val(); // Assuming your password field has an ID of 'passwordField'
+
+    // Hash the password using SHA-256
+    async function hashPassword(password) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        return hash;
+    }
+
+    hashPassword(password)
+        .then(hashedPassword => {
+            // Convert the hashed password to a hexadecimal string
+            const hashedPasswordHex = Array.from(new Uint8Array(hashedPassword))
+                .map(byte => byte.toString(16).padStart(2, '0'))
+                .join('');
+
+            // Create an object with username and hashed password
+            var formData = {
+                username: username,
+                password: hashedPasswordHex
+            };
+
+            // Convert the object to a JSON string
+            var formDataJSON = JSON.stringify(formData);
+            // some other
 
 
-                    var formData = $('#loginForm').serializeArray();
+                    /*// Prepare Data                                                            
+                    var username = $('#usernameField').val();
+                    var password = $('#passwordField').val();
+                    var encryptedPassword = CryptoJS.AES.encrypt(password, 'your_secret_key').toString();
+                    var formData = {
+                        username: username,
+                        password: encryptedPassword
+                    };
+                    var formDataJSON = JSON.stringify(formData);*/
+                    // Prepare Data  
+
+                    // old 
+                   /* var formData = $('#loginForm').serializeArray();
                     // Convert the serialized form data to a JSON object
                     var formDataObject = {};
                     $.each(formData, function(index, field) {
@@ -94,12 +134,11 @@
 
                     // Convert the JSON object to a JSON string
                     var formDataJSON = JSON.stringify(formDataObject);           
-
-                    // Prepare Data
+                    // old*/
 
                     $.ajax({
                         type: "POST",
-                        url: './queries/auth.php',
+                        url: './queries/auth.php',                        
                         data: {data : formDataJSON},
                         success: function(response)
                         {                                        
@@ -115,6 +154,12 @@
                             // You can provide a more user-friendly error message or handle errors as needed.
                         }
                     });
+                    
+                    })
+                    .catch(error => {
+            console.error('Error hashing password:', error);
+        });
+
                 })
 
             });

@@ -18,18 +18,29 @@
                                 <div class="divider"></div>
                                 <a class="dropdown-item" href="#">More Options</a>
                             </div>
+                        </li>   
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="facility.php" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="no-icon">Facility</span>
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" href="facility.php?act=searchFac">Search Facility</a>
+                                <a class="dropdown-item" href="facility.php?act=createFac">Create Facility</a>                                                                
+                            </div>
                         </li>                        
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="users.php">
+                                <span class="no-icon">Users</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="myaccount.php" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="no-icon">Your Account</span>
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="./queries/deauth.php">
-                                <span class="no-icon">Logout</span>
-                            </a>
-                        </li>
-                        
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" href="./queries/deauth.php">Logout</a>                                
+                            </div>
+                        </li>                        
                     </ul>
                 </div>
             </div>

@@ -41,11 +41,15 @@
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link href="../assets/css/demo.css" rel="stylesheet" />
 
-    
-
     <script src="../assets/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
 
     <script type="text/javascript">
+
+        window.onload = function() {    
+            const params = new URLSearchParams(window.location.search);            
+            const param_id = params.get('shipment_id'); 
+            $('#shipmentID').val(param_id);                        
+        };
 
         function checkUpdateStat(){
             
@@ -341,7 +345,7 @@
                                     
                                     $("#shipment_details_row").append("\
                                         <div class='col-md-12'>\
-                                            <h4 class='card-title'>Shipment Details</h4>\
+                                            <h4 class='card-title'><U>Shipment Details</U></h4>\
                                         </div>\
                                         <div class='col-md-3'>\
                                             Shipment ID: "+shipment.shipment_id+"\
@@ -359,7 +363,7 @@
                                         
                                     $("#sender_details_row").append("\
                                         <div class='col-md-12'>\
-                                            <hr/><h4 class='card-title'>Sender Details</h4>\
+                                            <hr/><h4 class='card-title'><U>Sender Details</U></h4>\
                                         </div>\
                                         <div class='col-md-4'>\
                                             Full Name: "+shipment.sender_name+"\
@@ -374,7 +378,7 @@
 
                                     $("#receiver_details_row").append("\
                                         <div class='col-md-12'>\
-                                            <hr/><h4 class='card-title'>Receiver Details</h4>\
+                                            <hr/><h4 class='card-title'><U>Receiver Details</U></h4>\
                                         </div>\
                                         <div class='col-md-4'>\
                                             Full Name: "+shipment.receiver_name+"\
@@ -472,7 +476,7 @@
                                             </div>
                                             <div class="col-md-12">
                                                 <div class="form-group">
-                                                    <button type="submit" class="btn btn-info btn-fill" style="margin:1px">Track</button>
+                                                    <button type="submit" id="searchShipBtn" class="btn btn-info btn-fill" style="margin:1px">Track</button>
                                                     <button type="button" class="btn btn-info btn-fill" id="clearBtn" style="margin:1px"disabled>Clear</button>                                                
                                                     <button type="button" class="btn btn-fill" id="modifyBtn" style="margin:1px" disabled>Modify</button>
                                                     <button type="button" class="btn btn-fill" id="updateStatusBtn" style="margin:1px" disabled>Update Status</button>

@@ -1,0 +1,24 @@
+// Password to be hashed
+const password = '12';
+
+// Hash the password using SHA-256
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return hash;
+}
+
+hashPassword(password)
+    .then(hashedPassword => {
+        // Convert the hashed password to a hexadecimal string
+        const hashedPasswordHex = Array.from(new Uint8Array(hashedPassword))
+            .map(byte => byte.toString(16).padStart(2, '0'))
+            .join('');
+        
+        console.log('Hashed password:', hashedPasswordHex);
+    })
+    .catch(error => {
+        console.error('Error hashing password:', error);
+    });
+

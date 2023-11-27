@@ -116,7 +116,10 @@
                                 alert(responseData[0].error_msg);
                             }
                             else{
-                                alert(responseData[0].shipment_id);
+                                const form = document.getElementById('bookShipment');
+                                form.reset();
+                                window.location.href="./trackshipment.php?shipment_id="+responseData[0].shipment_id
+                                //alert(responseData[0].shipment_id);
                             }
                         },
                         error: function (xhr, status, error) {

@@ -1,7 +1,9 @@
 <?php
 
-    include("../includes/db_connect.php");
-    //include("./db_connect.php");
+    //include("../includes/db_connect.php");
+    echo "1";
+    include("./db_connect.php");
+    echo "2";
 
     function verifyPassword($providedPasswordHash, $dbHashedPassword) {
         // Implement your logic for password verification here
