@@ -17,6 +17,7 @@
                       //          INNER JOIN shipment_details on shipment_details.shipment_id=shipment_events.shipment_id where shipment_events.shipment_id='".$shipmentID."'";                    
                       
                       $query_events = "SELECT shipment_events.event_id as event_id,shipment_events.date as event_date,shipment_events.remarks as event_remarks,shipment_events.activity as events_activity,shipment_details.shipment_status as shipment_status, shipment_facility.facility_id,shipment_facility.facility_name 
+                      , shipment_events.forward_to as forward_to, shipment_events.return_to as return_to
                       FROM shipment_events 
                       INNER JOIN shipment_details on shipment_details.shipment_id=shipment_events.shipment_id 
                       INNER JOIN shipment_facility on shipment_facility.facility_id=shipment_events.facility_id where shipment_events.shipment_id='".$shipmentID."' ORDER BY shipment_events.event_id DESC";

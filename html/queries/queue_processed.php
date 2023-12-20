@@ -11,6 +11,7 @@
     else{
             
         $curUserID=$_SESSION['user_id'];        
+        $curUserFacID=$_SESSION['facility_id'];
         $checkPer=checkPermission($curUserID,"TRACK_SHIP",$connection);        
         if($checkPer==="1"){
             
@@ -22,28 +23,31 @@
                 switch($typeofReq){
 
                     case "INCOMING";
-                        $query = "SELECT * FROM shipment_events se WHERE event_id = (
-                                        SELECT MAX(event_id)
-                                        FROM shipment_events
-                                        WHERE shipment_id = se.shipment_id
-                                    ) ;";
-                        
+                        $query="select * from shipment_details
+                            where (shipment_status like 'FORWARD' or shipment_status like 'RETURN') and dest_id='".$curUserFacID."'";
                     break;
 
                     case "INQUEUE";
-                        $query = "SELECT * FROM shipment_events se WHERE event_id = (
+                        /*$query = "SELECT * FROM shipment_events se WHERE event_id = (
                                         SELECT MAX(event_id)
                                         FROM shipment_events
                                         WHERE shipment_id = se.shipment_id
-                                    ) and activity='ARRIVED' ;";
+                                    ) and activity='ARRIVED' ;";*/
+
+                        $query="select * from shipment_details
+                            where 
+                            (
+                                shipment_status like 'ARRIVED' or 
+                                shipment_status like 'CREATED' or 
+                                shipment_status like 'OUT_FOR_DELIVERY' or
+                                shipment_status like 'ONHOLD' or
+                                shipment_status like 'RELEASE_ON_HOLD'
+                            ) and dest_id='".$curUserFacID."'";
                     break;
 
                     case "PROCESSED";
-                        $query = "SELECT * FROM shipment_events se WHERE event_id = (
-                                        SELECT MAX(event_id)
-                                        FROM shipment_events
-                                        WHERE shipment_id = se.shipment_id
-                                    ) and activity='ARRIVED' ;";
+                        $query="select * from shipment_details
+                            where (shipment_status like 'DELIVERED' or shipment_status like 'CANCEL') and dest_id='".$curUserFacID."'";                            
                     break;                                      
 
                 }                

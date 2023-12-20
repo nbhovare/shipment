@@ -5,6 +5,19 @@
         header("location:./login.php");
     }        
 
+
+    require("./includes/db_connect.php");
+    require("./includes/check_permission.php");
+
+    $resForPagePer=checkPermission($_SESSION['user_id'],"trackshipment_php",$connection);
+    if($resForPagePer==="0"){
+        echo "You do not have permission to this page, Please contact your administrator for any query<br/>";       
+        echo "<a href='./index.php'>Click here to goto home page</a>";
+    }
+    else{
+
+        $retPerData=getUserPermissionForPage($_SESSION['user_id'],"trackshipment_php",$connection);
+
 ?>
 
 <!-- 
@@ -37,11 +50,27 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
     <!-- CSS Files -->
     <link href="../assets/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="../assets/css/light-bootstrap-dashboard.css?v=2.0.0 " rel="stylesheet" />
+    <link href="../assets/css/light-bootstrap.css" rel="stylesheet" />
+    <link href="../assets/css/light-bootstrap-dashboard.css?v=2.0.0 " rel="stylesheet" />    
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link href="../assets/css/demo.css" rel="stylesheet" />
 
+    <link href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" rel="stylesheet" />    
+
     <script src="../assets/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
+
+
+
+    <!-- Adding CSS for shipment progress bar -->
+    <style>
+
+
+        @import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+/*body{background-color: #eeeeee;font-family: 'Open Sans',serif}*/
+body{background-color: #eeeeee;font-family: 'Open Sans',serif; }
+.container{margin-top:50px;margin-bottom: 50px}
+.card{position: relative;display: -webkit-box;display: -ms-flexbox;display: flex;-webkit-box-orient: vertical;-webkit-box-direction: normal;-ms-flex-direction: column;flex-direction: column;min-width: 0;word-wrap: break-word;background-color: #fff;background-clip: border-box;border: 1px solid rgba(0, 0, 0, 0.1);border-radius: 0.10rem}.card-header:first-child{border-radius: calc(0.37rem - 1px) calc(0.37rem - 1px) 0 0}.card-header{padding: 0.75rem 1.25rem;margin-bottom: 0;background-color: #fff;border-bottom: 1px solid rgba(0, 0, 0, 0.1)}.track{position: relative;background-color: #ddd;height: 7px;display: -webkit-box;display: -ms-flexbox;display: flex;margin-bottom: 60px;margin-top: 50px}.track .step{-webkit-box-flex: 1;-ms-flex-positive: 1;flex-grow: 1;width: 25%;margin-top: -18px;text-align: center;position: relative}.track .step.active:before{background: #FF5722}.track .step::before{height: 7px;position: absolute;content: "";width: 100%;left: 0;top: 18px}.track .step.active .icon{background: #ee5435;color: #fff}.track .icon{display: inline-block;width: 40px;height: 40px;line-height: 40px;position: relative;border-radius: 100%;background: #ddd}.track .step.active .text{font-weight: 400;color: #000}.track .text{display: block;margin-top: 7px}.itemside{position: relative;display: -webkit-box;display: -ms-flexbox;display: flex;width: 100%}.itemside .aside{position: relative;-ms-flex-negative: 0;flex-shrink: 0}.img-sm{width: 80px;height: 80px;padding: 7px}ul.row, ul.row-sm{list-style: none;padding: 0}.itemside .info{padding-left: 15px;padding-right: 7px}.itemside .title{display: block;margin-bottom: 5px;color: #212529}p{margin-top: 0;margin-bottom: 1rem}.btn-warning{color: #ffffff;background-color: #ee5435;border-color: #ee5435;border-radius: 1px}.btn-warning:hover{color: #ffffff;background-color: #ff2b00;border-color: #ff2b00;border-radius: 1px}
+    </style>    
 
     <script type="text/javascript">
 
@@ -52,8 +81,10 @@
         };
 
         function checkUpdateStat(){
-            
+                        
             var actv=$("#activity").val();            
+
+            $("#remarks").val(getStandardStatus(actv));
             if(actv==="FORWARD" || actv==="RETURN"){
                 $('#facility_id_label').empty();                
                 $('#facility_id').show();
@@ -117,6 +148,49 @@
             }    
         }
 
+        function getStandardStatus(getStatusOf){
+            var reason="";
+            switch(getStatusOf){
+                case "ARRIVED":
+                    reason="Arrived at Facility";
+                break;
+                
+                case "FORWARD":
+                    reason="Forwarding to another facility for further transit";
+                break;
+
+                case "RETURN":
+                    reason="Returning to another facility for further transit";
+                break;
+
+                case "OUT_FOR_DELIVERY":
+                    reason="Out for Delivery";
+                break;
+
+                case "DELIVERED":
+                    reason="Delivered to Customer";
+                break;
+
+                case "ONHOLD":
+                    reason="Placing ONHOLD basis: 'Mention your Business requirement/ Reason for Placing ONHOLD'";
+                break;
+
+                case "RELEASE_ON_HOLD":
+                    reason="Releasing ONHOLD basis: 'Mention your Business requirement/ Reason'";
+                break;
+
+                case "CANCEL":
+                    reason="Cancelling shipment basis: 'Mention your Business requirement/ Reason for cancellation'";
+                break;
+
+                default:
+                    reason="";
+                break;
+                
+            }
+            return reason;
+        }
+
         function getCurrentTime(){
             // Create a new Date object for the current time
             const now = new Date();
@@ -152,12 +226,12 @@
                     url: './queries/queue_processed.php',
                     data:  {typeofReq:type},
                     success: function(response)
-                    {
-                        if(response.error_msg){
-                            alert(response.error_msg.error_msg);
-                        }
+                    {                        
+                        if(response.error_msg){                            
+                            alert(response[0].error_msg);
+                        }                        
                         else{
-
+                            
                             $("#clearBtn").prop("disabled", false);                                                     
                            
                             $.each(response.shipment_data, function(index, event) {
@@ -189,6 +263,12 @@
             $("#shipment_status_update_col").hide();    
             $("#queue_process_form").hide();
             
+            <?php 
+
+                if($retPerData!="-1" && $retPerData!="0"){
+                    if(in_array("trackshipment_php_UPDATE_SHIP_STATUS",$retPerData)){                    
+
+            ?>
             $("#updateStatusBtn").click(function(){                
                 $("#shipment_status_update_col").show();                                                                
             });
@@ -265,10 +345,20 @@
                 }
             });
 
+            <?php 
+}
+
+if(in_array("trackshipment_php_MODIFY_SHIP_DETAILS",$retPerData)){
+
+            ?>
+
+
             $("#modifyBtn").click(function(){
                 var shipmentID=$("#shipmentID").val();
                 window.location.href="./update.php?shipID="+shipmentID;
             })
+
+            <?php }} ?>
 
             $("#clearBtn").click(function(){
                 $("#trackShipment").trigger("reset");
@@ -342,54 +432,129 @@
                                 $("#receiver_details_row").empty();
                                 // Loop through shipment_data array
                                 $.each(response.shipment_data, function(index, shipment) {                                                                    
-                                    
+                                    shipStat="";                                    
+                                    if(
+                                                shipment.shipment_status==="ARRIVED" || 
+                                                shipment.shipment_status==="RELEASE_ON_HOLD" ||
+                                                shipment.shipment_status==="FORWARD" ||
+                                                shipment.shipment_status==="RETURN"){
+                                                    shipStat='Shipment In Transit';
+                                            }
+                                            else if(shipment.shipment_status==="CREATED"){
+                                                shipStat="BOOKED";
+                                            }
+                                            else if(shipment.shipment_status==="OUT_FOR_DELIVERY"){
+                                                shipStat="Out For Delivery";
+                                            }
+                                            else{
+                                                shipStat=shipment.shipment_status        
+                                            }                                                                    
+
+                                const colForProgress=$("<div>").addClass("col-md-12");                                                               
+                                const cardForPro=$("<article>").addClass("card");
+                                const cardHeaderForPro=$("<header>").addClass("card-header").append("Shipment Progress");
+                                const cardBodyForPro=$("<div>").addClass("card-body");
+                                const trackForPro=$("<div>").addClass("track");
+
+                                var shipmentStatusArr=["Booked by Facility","On the way","Out for delivery","Delivered/Cancel"];                                
+                                var arrIcon=["fa-check","fa-user","fa-truck","fa-box"];                                
+                                var active="";
+                                if(shipment.shipment_status==="CREATED"){
+                                    active=0;
+                                }
+                                if(shipment.shipment_status==="ARRIVED" || shipment.shipment_status==="FORWARD" || 
+                                shipment.shipment_status==="RETURN" || shipment.shipment_status==="ONHOLD"
+                                 || shipment.shipment_status==="RELEASE_ON_HOLD"){
+                                    active=1;
+                                 }
+                                 if(shipment.shipment_status==="OUT_FOR_DELIVERY"){
+                                    active=2;
+                                 }
+                                if(shipment.shipment_status==="CANCEL"){
+                                    active=3;
+                                    shipmentStatusArr[3]="Cancelled";
+                                }
+                                if(shipment.shipment_status==="DELIVERED"){
+                                    active=3;
+                                    shipmentStatusArr[3]="Delivered";
+                                }
+
+                                // Ship Status
+                                // Booked by Facility = Created
+                                // On the way = Forward, Arrived, Return
+                                // Out for delivery = Out for delivery
+                                // Cancel/ Delivered = Cancel, Delivered
+
+                                const activeComp="<div class='step active'> <span class='icon'> <i class='fa fa-check'></i> </span> <span class='text'>Order confirmed</span> </div>";                                
+
+
+                                for(let i=0;i<4;i++){                                                                    
+                                    const spanIcon=$("<span>").addClass("icon");
+                                    const spanText=$("<span>").addClass("text");
+                                    const icon=$("<i>").addClass("fa");
+                                    const stepDiv=$("<div>").addClass("step");
+                                    if(i<=active){                            
+                                        stepDiv.addClass("active");                                     
+
+                                    }                                    
+                                    icon.addClass(arrIcon[i]);
+                                        spanText.append(shipmentStatusArr[i]);
+                                        spanIcon.append(icon);
+                                        stepDiv.append(spanIcon).append(spanText); 
+                                        trackForPro.append(stepDiv);
+                                }                                
+                                                                
+                                cardBodyForPro.append(trackForPro); 
+                                cardForPro.append(cardHeaderForPro).append(cardBodyForPro);                            
+                                colForProgress.append(cardForPro);
+
+                                $("#shipment_details_row").append(colForProgress);
+
+                                const mainColForShipDTable=$("<div>").addClass("row");
+                                let shipFieldsList=[
+                                    ["shipment_id","shipment_status","shipment_type","shipment_weight","shipment_delivery_method","shipment_cost","payment_type","additional_information"],
+                                    ["sender_name","sender_phone","sender_address","sender_city","sender_state"],
+                                    ["receiver_name","receiver_phone","receiver_address","receiver_city","receiver_state"]
+                                ];
+                                let shipDetailsHeading=["Shipment Details","Sender Details","Receiver Details"];
+                                             
+                                for(let shipInc=0;shipInc<3;shipInc++){
+                                            const colForShipDTable=$("<div>").addClass("col-md-4");
+                                            const shipDetailsTable=$("<table>");
+                                            const shipDetailsTableBody=$("<tbody>");
+                                    for(let shipD in shipment){
+                                        if(shipFieldsList[shipInc].includes(shipD)){
+                                            const tableRow=$("<tr>");
+                                            const tableRowBdy=$("<td>").append(shipD);
+                                            const tableRowBdy1=$("<td>").append(shipment[shipD]);
+                                            tableRow.append(tableRowBdy).append(tableRowBdy1);
+                                            shipDetailsTableBody.append(tableRow);                                                                        
+                                        }
+                                    }
+                                    shipDetailsTable.append(shipDetailsTableBody);
+                                    colForShipDTable.append("<h4 class='card-title'><U>"+shipDetailsHeading[shipInc]+"</U></h4>");
+                                    colForShipDTable.append(shipDetailsTable);                                    
+                                    mainColForShipDTable.append(colForShipDTable);
+                                }                                
+                                $("#shipment_details_row").append(mainColForShipDTable);
+                                /*                                    
                                     $("#shipment_details_row").append("\
-                                        <div class='col-md-12'>\
-                                            <h4 class='card-title'><U>Shipment Details</U></h4>\
-                                        </div>\
-                                        <div class='col-md-3'>\
-                                            Shipment ID: "+shipment.shipment_id+"\
-                                        </div>\
-                                        <div class='col-md-3'>\
-                                            Status: "+shipment.shipment_status+"\
-                                        </div>\
-                                        <div class='col-md-3'>\
-                                            Weight (IN KG): "+shipment.shipment_weight+"\
-                                        </div>\
-                                        <div class='col-md-3'>\
-                                            Content Type: "+shipment.content_type+"\
-                                        </div>");
-                                        // Appeding Data
-                                        
-                                    $("#sender_details_row").append("\
-                                        <div class='col-md-12'>\
-                                            <hr/><h4 class='card-title'><U>Sender Details</U></h4>\
-                                        </div>\
                                         <div class='col-md-4'>\
-                                            Full Name: "+shipment.sender_name+"\
-                                        </div>\
-                                        <div class='col-md-4'>\
-                                            Mobile Number: <a href=tel:'"+shipment.sender_phone+"'>"+shipment.sender_phone+"</a>\
-                                        </div>\
-                                        <div class='col-md-4'>\
-                                            Address: "+shipment.sender_city+",   "+ shipment.sender_state + ", " + shipment.sender_country + ", " + shipment.sender_pincode +"\
+                                            <h4 class='card-title'><U>Sender Details</U></h4><br/>\
+                                            Full Name: "+shipment.sender_name+"<br/>\
+                                            Mobile Number: <a href=tel:'"+shipment.sender_phone+"'>"+shipment.sender_phone+"</a><br/>\
+                                            Address: "+shipment.sender_city+",   "+ shipment.sender_state + ", " + shipment.sender_country + ", " + shipment.sender_pincode +"<br/>\
                                         </div>");
                                     // Appeding Data
 
-                                    $("#receiver_details_row").append("\
-                                        <div class='col-md-12'>\
-                                            <hr/><h4 class='card-title'><U>Receiver Details</U></h4>\
-                                        </div>\
+                                    $("#shipment_details_row").append("\
                                         <div class='col-md-4'>\
-                                            Full Name: "+shipment.receiver_name+"\
-                                        </div>\
-                                        <div class='col-md-4'>\
-                                            Mobile Number: <a href=tel:'"+shipment.receiver_phone+"'>"+shipment.receiver_phone+"</a>\
-                                        </div>\
-                                        <div class='col-md-4'>\
-                                            Address: "+shipment.receiver_city+", "+ shipment.receiver_state + ", " + shipment.receiver_country + ", " + shipment.receiver_pincode +"\
+                                            <h4 class='card-title'><U>Receiver Details</U></h4><br/>\
+                                            Full Name: "+shipment.receiver_name+"<br/>\
+                                            Mobile Number: <a href=tel:'"+shipment.receiver_phone+"'>"+shipment.receiver_phone+"</a><br/>\
+                                            Address: "+shipment.receiver_city+", "+ shipment.receiver_state + ", " + shipment.receiver_country + ", " + shipment.receiver_pincode +"<br/>\
                                         </div>");
-                                    // Appeding Data
+                                    // Appeding Data*/
                                     
                                 });
 
@@ -397,16 +562,49 @@
                                 $("#shipment_event_table").empty();
                                 $("#shipment_event_card").show();
                                 $("#shipment_event_table").show();
+                                
+                                var eventField=["facility_id","facility_name","event_date","events"];
                                 $.each(response.events_data, function(index, event) {
                                     
-                                        $("#shipment_event_table").append("abc\
+                                    nextFac="";
+                                    if(event.forward_to===null && event.return_to===null){
+                                        nextFac="-";
+                                    }
+                                    if(event.events_activity==="FORWARD"){
+                                        nextFac=event.forward_to;
+                                    }
+                                    if(event.events_activity==="RETURN"){
+                                        nextFac=event.return_to;
+                                    }
+                                    
+
+                                        /*const eventTableRow=$("<tr>");
+                                        for(let eventData in event){                                            
+                                            const eventTableRowBdy=$("<td>");
+                                            if(eventData==="facility_id"){
+                                                const anchorForEvent_FacID=$("<a>").attr({
+                                                    href:"./facility.php?fac_id="+event[eventData],
+                                                    target:"_blank"                                                    
+                                                }).text(event["facility_name"]);
+                                                eventTableRowBdy.append(anchorForEvent_FacID);                                            
+                                            }
+                                            else{
+                                                eventTableRowBdy.append(event[eventData]);
+                                            }                                      
+                                            
+                                            
+                                            eventTableRow.append(eventTableRowBdy);
+                                        }*/
+                                        
+                                        //$("#shipment_event_table").append(eventTableRow);
+                                        $("#shipment_event_table").append("\
                                         <tr>\
                                             <td><a href='./facility.php?fac_id="+event.facility_id+"' target=_blank>\
                                             "+event.facility_name+"</a></td>\
                                             <td>"+event.event_date+"</td>\
                                             <td>"+event.events_activity+"</td>\
-                                            <td>Niger</td>\
-                                            <td>Oud-indexsut</td>\
+                                            <td>"+event.facility_name+"</td>\
+                                            <td>"+nextFac+"</td>\
                                             <td>"+event.event_remarks+"</td>\
                                         </tr>");
                                 });
@@ -440,15 +638,16 @@
 </div>
 <!--  End Modal -->
 
+<?php 
+
+        include("./includes/loaders.php");
+
+?>
     <div class="wrapper">
 
 
-        <?php
-            include("./includes/sidebar.php");
-        ?>
-        
-
-    <div class="main-panel">
+  
+    
         <?php
 
             include("./includes/navbar.php");
@@ -456,9 +655,16 @@
         ?>
 
             <!-- Main Content -->
-            <div class="content">
+            <div class="content" style='margin-top:10px'>
                 <div class="container-fluid">
                     <div class="row">
+
+                    <?php
+
+                            include("./includes/quick_links.php");
+
+                      ?>
+
                         <div class="col-md-12">
                             <div class="card">
                                 <div class="card-header">
@@ -477,9 +683,27 @@
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <button type="submit" id="searchShipBtn" class="btn btn-info btn-fill" style="margin:1px">Track</button>
-                                                    <button type="button" class="btn btn-info btn-fill" id="clearBtn" style="margin:1px"disabled>Clear</button>                                                
+                                                    <button type="button" class="btn btn-info btn-fill" id="clearBtn" style="margin:1px"disabled>Clear</button>      
+                                                    
+                                                    <?php 
+                                                        // checking if user has access to modifu track shipmentdetails if yes then show button
+
+                                                        if($retPerData!="-1" && $retPerData!="0"){                                                            
+                                                            if(in_array("trackshipment_php_MODIFY_SHIP_DETAILS",$retPerData)){                                                                
+                                                                //echo "<button type='button' class='btn btn-fill' id='modifyBtn' style='margin:1px' disabled>Modify</button>";
+                                                            ?>
+                                                    
                                                     <button type="button" class="btn btn-fill" id="modifyBtn" style="margin:1px" disabled>Modify</button>
-                                                    <button type="button" class="btn btn-fill" id="updateStatusBtn" style="margin:1px" disabled>Update Status</button>
+
+                                                    <?php }
+                                                    
+                                                    if(in_array("trackshipment_php_UPDATE_SHIP_STATUS",$retPerData)){
+                                                        ?>
+<button type="button" class="btn btn-fill" id="updateStatusBtn" style="margin:1px" disabled>Update Status</button>
+                                                    <?php }
+
+                                                        }
+                                                    ?>                                                    
                                                     <button type="button" class="btn btn-fill" id="shipmentsIncoming" onclick="QueueProcessed('INCOMING')">Shipments - Incoming</button>
                                                     <button type="button" class="btn btn-fill" id="shipmentsInQueue" onclick="QueueProcessed('INQUEUE')">Shipments - In Queue</button>
                                                     <button type="button" class="btn btn-fill" id="shipmentsProcessed" onclick="QueueProcessed('PROCESSED')">Shipments - Processed</button>
@@ -516,6 +740,14 @@
                         <!-- Tracking Form -->
                         
 
+
+                        <?php 
+                            // checking if user has access to Update Shipemnt if yes then show below code
+
+                            if($retPerData!="-1" && $retPerData!="0"){                                                            
+                                if(in_array("trackshipment_php_UPDATE_SHIP_STATUS",$retPerData)){                                                                                                    
+                                ?>
+
                          <!-- Shipment Status Update card -->
                          <div class="col-md-12" id="shipment_status_update_col">
                             <div class="card table-plain-bg">  
@@ -527,17 +759,26 @@
                                 <form id="updateshipmentStatusForm" method=POST>                                    
                                     <div class="row form-group">
                                         <div class='col-md-4'>
-                                            <label for='date'>Update Status: <span style="color:red;font-weight:bold">*</span></label>
+                                            <label for='date'>Update Status : <span style="color:red;font-weight:bold">*</span></label>
                                             <select name='activity' id='activity' class='form-control' onchange="checkUpdateStat()">
                                                 <option value='Update Shipment Status'>Update Shipment Status</option>
+                                                <?php 
+                                                    if($_SESSION['type']==="SADMIN" || $_SESSION['type']==="FADMIN"){
+
+                                                
+                                                ?>
                                                 <option value='ARRIVED'>Mark Arrived</option>                                                
                                                 <option value='FORWARD'>Forward</option>
-                                                <option value='ON_HOLD'>Place ON-HOLD</option>
+                                                <option value='ONHOLD'>Place ON-HOLD</option>
                                                 <option value='RELEASE_ON_HOLD'>Release ON-HOLD</option>
-                                                <option value='RETURN'>Return</option>
-                                                <option value='DELIVERED'>Delivered</option>
+                                                <option value='RETURN'>Return</option>                                                
                                                 <option value='OUT_FOR_DELIVERY'>Out For Delivery</option>
                                                 <option value='CANCEL'>Cancel Shipment</option>
+
+                                                <?php 
+                                                    }
+                                                ?>
+                                                <option value='DELIVERED'>Delivered</option>
                                             </select>
                                         </div>
                                         <div class='col-md-4'>
@@ -865,6 +1106,10 @@
                         </div>
                         <!-- Shipment Status Update card -->
 
+                        <?php 
+                        }
+                    } ?>
+
                         <!-- Shipment Details card -->                    
                         <div class="col-md-12" id="shipment_details_col">
                             <div class="card table-plain-bg">                                
@@ -887,26 +1132,29 @@
                                     <h4 class="card-title">Shipment Activity</h4>
                                     <p class="card-category">Click on any entry to get more Details</p>
                                 </div>
-                                <div class="card-body table-full-width table-responsive">
-                                    <table class="table table-hover">
-                                    <thead>
-                                        <th>Facility</th>
-                                        <th>Date (Year/Month/Date)</th>
-                                        <th>Activity</th>                                        
-                                        <th>From</th>
-                                        <th>To</th>                                        
-                                        <th>Remarks</th>                                      
-                                    </thead>
-                                    <tbody id="shipment_event_table">
-                                    </tbody>
-                                    </table>
+                                <div class="card-body" style='overflow-y: auto;'>
+                                    <div class="table-responsive">
+                                        <table class="">
+                                            <thead>
+                                                <tr>
+                                                <th>Facility</th>
+                                                <th>Date (Year/Month/Date)</th>
+                                                <th>Activity</th>                                        
+                                                <th>From</th>
+                                                <th>To</th>                                        
+                                                <th>Remarks</th>                                      
+                                                </tr>
+                                            </thead>
+                                            <tbody id="shipment_event_table">
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>  
                             </div>
                         </div>
                         <!-- Shipment Events Details card Close -->                      
                     </div>
-                </div>
-            </div>
+                </div>            
             <!-- Main Content Close -->
             <!-- Footer -->        
             <!-- Footer -->
@@ -933,3 +1181,6 @@
 
 
 </html>
+
+
+<?php }?>

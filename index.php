@@ -1,3 +1,3 @@
 <?php
-        header("Location: ./html/index.php");
+        header("Location: ./bluexps/index.php");
 ?>

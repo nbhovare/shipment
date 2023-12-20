@@ -241,9 +241,15 @@
 
 
             <!-- Main Content -->
-            <div class="content">
+            <div class="content" style='margin-top:10px'>
                 <div class="container-fluid">
                     <div class="row">
+
+                    <?php
+
+                            include("./includes/quick_links.php");
+
+                      ?>
                         <div class="col-md-12">
                             <div class="card-body">
                                 <div class="card table-plain-bg">

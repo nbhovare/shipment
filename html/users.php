@@ -5,6 +5,21 @@
         header("location:./login.php");
     }
 
+
+    require("./includes/db_connect.php");
+    require("./includes/check_permission.php");
+
+    $resForPagePer=checkPermission($_SESSION['user_id'],"users_php",$connection);
+    if($resForPagePer==="0"){
+        echo "You do not have permission to this page, Please contact your administrator for any query<br/>";       
+        echo "<a href='./index.php'>Click here to goto home page</a>";
+    }
+    else{
+
+        $retPerData=getUserPermissionForPage($_SESSION['user_id'],"users_php",$connection);
+        if($retPerData!="-1" && $retPerData!="0"){
+        
+
 ?>
 
 
@@ -32,7 +47,7 @@
     <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
     <link rel="icon" type="image/png" href="../assets/img/favicon.ico">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <title>Book Shipment</title>
+    <title>Users</title>
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
     <!--     Fonts and icons     -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
@@ -40,83 +55,613 @@
     <!-- CSS Files -->
     <link href="../assets/css/bootstrap.min.css" rel="stylesheet" />
     <link href="../assets/css/light-bootstrap-dashboard.css?v=2.0.0 " rel="stylesheet" />
+    <link href="../assets/css/light-bootstrap.css" rel="stylesheet" />
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link href="../assets/css/demo.css" rel="stylesheet" />
     <script src="../assets/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
+    <script src="../assets/js/menutab.js" type="text/javascript"></script>
 
+
+ 
 
 
     <script type="text/javascript">
-        $(document).ready(function() {
+
+
+    function checkboxChecked(checkbox) {
+                // Use the checkbox variable here       '
+                checkboxChecked.id = checkboxChecked.id || [];      
+                if (checkbox.checked) {                    
+                    if (!checkboxChecked.id.includes(checkbox.id)) {
+            checkboxChecked.id.push(checkbox.id); // Add ID to the array if it's not already present
+        }
+                    checkboxChecked.counter = (checkboxChecked.counter || 0) + 1;                
+                } else {
+                    const index = checkboxChecked.id.indexOf(checkbox.id);
+        if (index !== -1) {
+            checkboxChecked.id.splice(index, 1); // Remove ID from the array
+        }
+                    checkboxChecked.counter = (checkboxChecked.counter || 0) - 1;
+                }            
+            }
+
+            function getAllCheckedCheckboxes() {
+  const checkboxes = document.querySelectorAll('#userDataTable input[type="checkbox"]:checked');
+  return Array.from(checkboxes);
+}
+
             
-            $('#bookShipment').submit(function(e) {
-                e.preventDefault();
-                var formData = $('#bookShipment').serializeArray();
-                
+        <?php 
+        
+            if(in_array("users_php_VIEW_USERS",$retPerData)){
+
+        ?>
+
+        function  remPerToUser(){
+            // Removing Permission to users 
+            var curPermissions=$("#curPer").val();  
+            if(curPermissions.length>0){
+                for(var i=0;i<curPermissions.length;i++){
+                    $('#curPer option[value="'+  curPermissions[i]+'"]').remove();
+                    const optionToAdd=$("<option>").attr("value",curPermissions[i]).text(curPermissions[i]);
+                    $("#selectPer").append(optionToAdd);
+                }
+            }
+            else{
+                alert("Please Select Permissions to remove");
+            }
+            
+
+        }
+
+        function addPerToUser(){
+            // Adding Permission to users
+
+            var curPermissions=$("#selectPer").val();
+            if(curPermissions.length>0){
+                for(var i=0;i<curPermissions.length;i++){
+                    $('#selectPer option[value="'+  curPermissions[i]+'"]').remove();
+                    const optionToAdd=$("<option>").attr("value",curPermissions[i]).text(curPermissions[i]);
+                    $("#curPer").append(optionToAdd);
+                }
+            }
+            else{
+                alert("Please Select Permissions to add");
+            }
+        }
+
+   
+
+
+function getCurrentPer(){
+                // get All permission for user for selected page
+                const perForPage=$("#selectInputForPerType").val();
                 var error_res="";
-                                                
-                if(formData.find(field => field.name === "sender_phone").value.length!=10){
-                    error_res=error_res+"<li>Enter Sender Mobile Number Properly</li>";
-                }
-                
-                if(formData.find(field => field.name === "Receiver_phone").value.length!=10){
-                    error_res=error_res+"<li>Enter receiver Mobile Number Properly</li>";
-                }
-                
-                if(formData.find(field => field.name === "sender_pincode").value.length!=6){
-                    error_res=error_res+"<li>Enter Sender Pincode Properly</li>";
+                if(perForPage==="Select Permission For"){
+                    error_res="<li>Select Properly</li>";
                 }
 
-                if(formData.find(field => field.name === "Receiver_pincode").value.length!=6){
-                    error_res=error_res+"<li>Enter Receiver Pincode Properly</li>";
-                }
-
-                if(formData.find(field => field.name === "shipment_delivery_method").value==="Select Delivery Method"){
-                    error_res=error_res+"<li>Select Shipment Method Properly</li>";
-                }
-
-                if(formData.find(field => field.name === "shipment_type").value==="Select Shipment Type"){
-                    error_res=error_res+"<li>Select Shipment Type Properly</li>";
-                }
-                
-                if(formData.find(field => field.name === "content_type").value==="Select Shipment Content Type"){
-                    error_res=error_res+"<li>Select Shipment Content Type Properly</li>";
-                }
-
-                if(formData.find(field => field.name === "payment_type").value==="Select Payment Method"){
-                    error_res=error_res+"<li>Select Payment Method Properly</li>";
-                }
-               
                 if(error_res.length!=0){                    
                     $("#modal_message").empty();
                     $("#modal_message").append("<ul>"+error_res+"</ul>");
                     $('#error_modal').modal('show');
                 }
                 else{
+                       const checkedCheckboxes = getAllCheckedCheckboxes();
+        const checkedIds = checkedCheckboxes.map(checkbox => checkbox.id)[0];
 
+                    var data_send={
+                        "user_id":checkedIds,
+                        'type':"per",
+                        "perFor":perForPage
+                    };
+
+                    $.ajax({
+                    type: "POST",
+                    url: './queries/getUserData.php',
+                    data:  {data:data_send},
+                    success: function(response)
+                    {
+                        if(response.error_msg){
+                            $("#users_details_body").empty();                                    
+                            $("#users_details_body").append("No users associated with facility");
+                        }
+                        else{                                                                                                                                                                      
+                                                        
+                            
+                            if($("#showCurPerRow")){
+                                $("#showCurPerRow").remove();
+                            }
+
+                            const label=$("<label>").text('Current Permissions');
+                            const row=$('<div>').addClass('row').attr("id","showCurPerRow");
+                            const col=$('<div>').addClass('col-md-6');         
+                                                                                
+                            //const select=$('<select>').addClass('multi-select form-control').attr('id','curPer');
+                            const select=$('<select>').addClass('select_size form-control').attr({
+                                'id': 'curPer',
+                                'multiple':'multiple',
+                                'style': 'height:200px'
+                                });
+                            //.attr('id','curPer').attr('','multiple').attr('size','5');                                                     
+                            $.each(response.users_data, function(index, getUserDataArray) {   
+                                
+                                    $.each(getUserDataArray, function(innerIndex, getUserData) {
+                                        // Iterate over each object inside the inner arrays
+                                        const option=$('<option>').attr('value',getUserData.permission_type).text(getUserData.permission_type);
+                                            select.append(option); 
+                                    });
+                                                                                               
+                            });
+
+                            const centerTag=$("<center>");
+                            const btnAddPer=$("<button>").text("Add Selected").attr({
+                                "type":"button",
+                                "onclick":"addPerToUser()"
+                            });
+                            const btnRemPer=$("<button>").text("Remove Selected").attr({
+                                "type":"button",
+                                "onclick":"remPerToUser()"
+                            });                            
+
+                            col.append(label)
+                            col.append(select);
+                            centerTag.append(btnAddPer).append(btnRemPer);
+                            col.append(centerTag);                                
+                            row.append(col);   
+                            const col1=$('<div>').addClass('col-md-6');                            
+                            const label1=$("<label>").text('Assign Permission/Choose from below');                            
+                            const selectPer=$("<select>").text('Assign Permission').addClass('select_size form-control').attr({
+                                'id': 'selectPer',
+                                'multiple':'multiple',
+                                'style': 'height:200px'
+                                
+                                });
+
+
+                                let trackshipment_phpArr=[
+  "trackshipment_php_TRACK_SHIPMENT",
+  "trackshipment_php_UPDATE_SHIP_STATUS",
+  "trackshipment_php_MODIFY_SHIP_DETAILS"
+];
+        let booking_phpArr=[
+  "booking_php_BOOK_SHIP"
+];
+        let users_phpArr=[
+  "users_php_CREATE_USER",
+  "users_php_MANAGE_PERMISSIONS",
+  "users_php_VIEW_USERS",
+  "users_php_MANAGE_FACILITY",
+  "users_php_REMOVE_USER_FROM_FAC"
+];
+        let facility_phpArr=[
+  "facility_php_CREATE_FACILITY",
+  "facility_php_VIEW_FACILITY",
+  "facility_php_MODIFY_FAC_DETAILS",
+  "facility_php_MANAGE_USERS",
+  "facility_php_MANAGE_PERMISSION"
+];
+
+let reports_phpArr=[
+  "reports_php_CREATE_REPORT",
+  "reports_php_GET_USER_DATA"
+];
+
+                            let opts = null;
+
+                            switch(perForPage){
+                                case "trackshipment_php":
+                                    opts=trackshipment_phpArr;
+                                break;
+
+                                case "booking_php":
+                                    opts=booking_phpArr;
+                                break;
+                                case "facility_php":
+                                    opts=facility_phpArr;
+                                break;
+                                case "users_php":
+                                    opts=users_phpArr;
+                                break;
+                                case "reports_php":
+                                    opts=reports_phpArr;
+                                break;
+
+                            }
+
+                        
+                            // Check if response.users_data is not empty
+if (response.users_data && response.users_data.length > 0) {
+  let userPermissions = response.users_data.flatMap(user => user.map(permission => permission.permission_type));
+  let filteredOpts = opts.filter(opt => !userPermissions.includes(opt));
+
+  filteredOpts.forEach(function(optk) {                                                                
+                                const option=$('<option>').attr('value',optk).text(optk);
+                                selectPer.append(option);
+                            });   
+  
+  // Use filteredOpts as needed
+  // ...
+} else {
+  // Handle the case where response.users_data is empty
+  // ...
+
+  opts.forEach(optk=> {                                                                
+                                const option=$('<option>').attr('value',optk).text(optk);
+                                selectPer.append(option);
+                            });   
+}
+                            
+                                                                                                                                                           
+
+                            col1.append(label1);
+                            col1.append(selectPer);
+                            row.append(col1);
+                            
+
+                            //$("#actions_modal_title, #actions_modal_body").empty();                
+                            //$("#actions_modal_title").append('Actions Tab - Edit/Remove Permission'); 
+                            //$("#actions_modal_body").append(linkToFaqDocx);               
+                            //$("#actions_modal_title").append('<hr>');
+                            $("#actions_modal_body").append(row);
+                            //$("#actions_modal").modal('show');
+                            $("#userRemoveBtn").hide();
+                            $("#perSaveBtn").show();
+                            
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Ajax request failed with status: " + status + " and error: " + error);
+                        // You can provide a more user-friendly error message or handle errors as needed.
+                    }   
+                });
+                }
+            }
+
+        
+        function selectSearchChange(){
+            var error_res="";
+            var state=$("#search_fac_state").val();
+            if(state==="Select State"){
+                error_res="<li>Select State Properly </li>";
+            }
+
+            if(error_res.length!=0){                    
+                $("#modal_message").empty();
+                $("#modal_message").append("<ul>"+error_res+"</ul>");
+                $('#error_modal').modal('show');
+            }
+            else{
+                // List Facilities in Select                                
+                $.ajax({
+                    type: "POST",
+                    url: './queries/getFacilityList.php',
+                    data:  {facilityState:state},
+                    success: function(response)
+                    {
+                        if(response.error_msg){
+                            $("#search_fac_state_facility_id").empty();
+                            $('#search_fac_state_facility_id').prop('disabled', true);
+                            alert(response.error_msg.error_msg);                                    
+                        }
+                        else{    
+                            $('#search_fac_state_facility_id').prop('disabled', false);                        
+                            $("#search_fac_state_facility_id").empty();
+                            $("#search_fac_state_facility_id").append("\
+                                <option value='Select Branch'>Select Branch</option>");
+
+                            $.each(response.facility_data, function(index, getData) {
+                                
+                                $("#search_fac_state_facility_id").append("\
+                                    <option value="+getData.facility_id+">"+getData.facility_name+"</option>");
+                                });
+                                
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Ajax request failed with status: " + status + " and error: " + error);
+                        // You can provide a more user-friendly error message or handle errors as needed.
+                    }   
+                });         
+            }
+        }
+        
+        
+
+
+        function actionRemoveBtnClick(){
+            var error_msg="";
+            if(checkboxChecked.counter===0 || checkboxChecked.counter===undefined){   
+                error_msg="No Users Selected!!";
+            }
+            /*else if(checkboxChecked.counter>1){
+                error_msg="Only One Users at a time should be Selected for this operation!!";
+            }*/
+            
+            if(error_msg!=0){
+                $("#actions_modal_title, #actions_modal_body").empty();                
+                $("#actions_modal").modal('show');
+                $("#actions_modal_title").append('Actions Tab -Remove Users from facility');                
+                $("#actions_modal_title").append('<hr>');                
+                $("#actions_modal_body").append(error_msg);                            
+            }
+            else{
+
+                const checkedCheckboxes = getAllCheckedCheckboxes();
+        const checkedIds = checkedCheckboxes.map(checkbox => checkbox.id)[0];
+
+                    var data_send={
+                        user_id:checkedIds,
+                        type:"per"
+                    };
+
+
+                    $("#actions_modal_title, #actions_modal_body").empty();                
+                            $("#actions_modal_title").append('Actions Tab -Remove Users from facility');                
+                            $("#actions_modal_title").append('<hr>');
+                            const data_append=$("<p>").append(
+                                "Are you sure you want to remove selected users from facility"+
+                                "<br/>Total users selected = "+checkboxChecked.counter+
+                                "<br/>Also the permissions assigned to these users will be removed"
+                            );
+                            $("#actions_modal_body").append(data_append);
+                            $("#actions_modal").modal('show');                            
+                    $("#perSaveBtn").hide();
+                    $("#userRemoveBtn").show();                    
+
+
+            }                        
+        }
+
+        function actionEditBtnClick(){
+            var error_msg="";
+            if(checkboxChecked.counter===0 || checkboxChecked.counter===undefined){   
+                error_msg="No Users Selected!!";
+            }
+            else if(checkboxChecked.counter>1){
+                error_msg="Only One Users at a time should be Selected for this operation!!";
+            }
+            
+            if(error_msg!=0){
+                $("#actions_modal_title, #actions_modal_body").empty();                
+                $("#actions_modal").modal('show');
+                $("#actions_modal_title").append('Actions Tab - Edit/Remove Permission');                
+                $("#actions_modal_title").append('<hr>');                
+                $("#actions_modal_body").append(error_msg);                            
+            }
+            else{
+                                                   
+                const linkToFaqDocx=$("<a>").attr({
+                                "href":"./faq.php?topic_type=permission",
+                                "target":"_blank"
+                            }).text("Know more about permissions");                            
+
+                const label=$("<label>").text('Permission For');
+                const row=$('<div>').addClass('row');
+                const col=$('<div>').addClass('col-md-12');  
+                const selectInputForPerType=$("<select>").addClass("form-control").attr({
+                    "id":"selectInputForPerType",
+                    "onchange":"getCurrentPer()"                    
+                });
+
+                selectInputForPerType.empty();
+                const arrForSelPerType=["Select Permission For","Book Shipment Page","Track Shipment Page","Users Page","Facility Page","Reports Page"];
+                const arrForSelPerTypeID=["Select Permission For","booking_php","trackshipment_php","users_php","facility_php","reports_php"];                
+                for(let incPer=0;incPer<arrForSelPerType.length;incPer++){
+                    const optionForPerType=$("<option>").attr("value",arrForSelPerTypeID[incPer]).text(arrForSelPerType[incPer]);
+                    selectInputForPerType.append(optionForPerType);                   
+                }                
+
+                col.append(label);
+                col.append(selectInputForPerType);
+                row.append(col);                
+                
+                $("#actions_modal_title, #actions_modal_body").empty();                
+                    $("#actions_modal_title").append('Actions Tab - Edit/Remove Permission'); 
+                    $("#actions_modal_body").append(linkToFaqDocx);               
+                    $("#actions_modal_title").append('<hr>');
+                    $("#actions_modal_body").append(row);
+                    $("#actions_modal").modal('show');
+                    $("#userRemoveBtn").hide();
+                    $("#perSaveBtn").show();
+             
+            }
+
+        }
+
+
+        <?php } ?>
+
+
+        $(document).ready(function() {
+            
+
+            <?php 
+                if(in_array("users_php_CREATE_USER",$retPerData)){
+
+                    if($_SESSION['type']==="SADMIN"){
+            ?>
+
+            $("#assignFacility").change(function(){
+                if ($(this).is(':checked')) {
+                    $("#assignUserFacRow").show();
+                    
+                    // Adding other options to state & country
+                    const states = [
+                                            "Select State", "Andhra Pradesh", "Andaman and Nicobar Islands", "Arunachal Pradesh", "Assam", "Bihar",
+    "Chandigarh", "Chhattisgarh", "Dadar and Nagar Haveli", "Daman and Diu", "Delhi", "Lakshadweep",
+    "Puducherry", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand",
+    "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
+    "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
+    "Uttarakhand", "West Bengal"
+  ];
+
+  const selectApp = $('#assignUserFacState');  
+  
+  $.each(states, function(index, state) {    
+    const option = $('<option>').attr("value",state).text(state);
+    selectApp.append(option);
+  });
+                } else {
+                    $("#assignUserFacRow").hide();      
+                    $('#assignUserFacState').empty();
+                }
+            });
+
+
+            $("#assignUserFacState").change(function(){                
+                var error_res="";
+                var state=$("#assignUserFacState").val();
+                if(state==="Select State"){
+                    error_res="<li>Select State Properly </li>";
+                }
+
+                if(error_res.length!=0){                    
+                    $("#modal_message").empty();
+                    $("#modal_message").append("<ul>"+error_res+"</ul>");
+                    $('#error_modal').modal('show');
+                }
+                else{
+                    // List Facilities in Select                                
+                    $.ajax({
+                        type: "POST",
+                        url: './queries/getFacilityList.php',
+                        data:  {facilityState:state},
+                        success: function(response)
+                        {
+                            if(response.error_msg){
+                                $("#createUserForm #facility_id").empty();
+                                $("#createUserForm #facility_id").prop("disabled",true);
+                                alert(response.error_msg.error_msg);                                    
+                            }
+                            else{    
+                                $("#createUserForm #facility_id").empty();
+                                $("#createUserForm #facility_id").prop("disabled",false);
+                                $("#createUserForm #facility_id").append("\
+                                    <option value='Select Branch'>Select Branch</option>");
+
+                                $.each(response.facility_data, function(index, getData) {
+                                    
+                                    $("#createUserForm #facility_id").append("\
+                                        <option value="+getData.facility_id+">"+getData.facility_name+"</option>");
+                                    });
+                                    
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Ajax request failed with status: " + status + " and error: " + error);
+                            // You can provide a more user-friendly error message or handle errors as needed.
+                        }   
+                    });         
+                }             
+            });
+
+
+            <?php 
+                }
+
+            ?>
+
+            $('#createUserForm').submit(function(e) {
+                e.preventDefault();
+                var formData = $('#createUserForm').serializeArray();
+                
+                var error_res="";                
+
+                if(formData.find(field => field.name === "mobile_no").value.length!=10){
+                    error_res=error_res+"<li>Enter Mobile Number Properly</li>";
+                }
+                
+                if(formData.find(field => field.name === "type").value==="Select User Type"){
+                    error_res=error_res+"<li>Incorrect Value for User Type</li>";
+                }
+                                
+                if ($("#assignFacility").is(':checked')) {
+                    if(formData.find(field => field.name === "assignUserFacState").value==="Select State"){
+                        error_res=error_res+"<li>Select State Properly</li>";
+                    }
+                    else{
+                        if(formData.find(field => field.name === "facility_id").value==="Select Branch"){
+                            error_res=error_res+"<li>Select Branch Properly</li>";
+                        }
+                    }
+                }
+                
+                if(error_res.length!=0){                    
+                    $("#modal_message").empty();
+                    $("#modal_message").append("<ul>"+error_res+"</ul>");
+                    $('#error_modal').modal('show');
+                }
+                else{
+                
+                
                     // Serialize the form data using jQuery                    
 
-                    // Convert the serialized form data to a JSON object
                     var formDataObject = {};
-                    $.each(formData, function(index, field) {
-                        formDataObject[field.name] = field.value;
-                    });
+                    let hashedPass="";
 
+                    $.each(formData, function(index, field) {
+                        if(field!="password"){
+                            formDataObject[field.name] = field.value;
+                        }
+                    });
+                    
+                        async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hash = await crypto.subtle.digest('SHA-256', data);    
+    return hash;
+}
+
+
+async function storeHashedPassword() {
+    try {
+        const hashedPassword = await hashPassword($("#createUserForm #password"));
+        // Convert the hashed password to a hexadecimal string
+        const hashedPasswordHex = Array.from(new Uint8Array(hashedPassword))
+            .map(byte => byte.toString(16).padStart(2, '0'))
+            .join('');
+        //hashedPass = hashedPasswordHex;        
+        formDataObject["password"] = hashedPasswordHex;
+    } catch (error) {
+        console.error('Error hashing password:', error);
+    }
+}
+
+// Call the function to store the hashed password
+storeHashedPassword();
+
+/*
+hashPassword($("#createUserForm #password"))
+    .then(hashedPassword => {
+        // Convert the hashed password to a hexadecimal string
+        const hashedPasswordHex = Array.from(new Uint8Array(hashedPassword))
+            .map(byte => byte.toString(16).padStart(2, '0'))
+            .join('');                                
+    })
+    .catch(error => {
+        console.error('Error hashing password:', error);    
+    });                    
+                */ 
+
+    //console.log(hashedPass);
+      //              formDataObject["password"] = hashedPass;
                     // Convert the JSON object to a JSON string
                     var formDataJSON = JSON.stringify(formDataObject);                    
                                                      
                     $.ajax({
                         type: "POST",
-                        url: './queries/bookShipment.php',
+                        url: './queries/createUser.php',
                         data:  {data: formDataJSON},
                         success: function(response)
                         {                                                        
                             var responseData = JSON.parse(response);
-                            if(response.error_msg){
+                            if(responseData[0].error_msg){                                
                                 alert(responseData[0].error_msg);
                             }
                             else{
-                                alert(responseData[0].shipment_id);
+                                document.getElementById('createUserForm').reset();
+                                alert(responseData[0].ret_msg);
                             }
                         },
                         error: function (xhr, status, error) {
@@ -126,33 +671,365 @@
                     });
                 }
             });
+
+            <?php } ?>
+
+            <?php 
+
+if(in_array("users_php_VIEW_USERS",$retPerData)){
+
+?>   
+            
+            
+            $("#perSaveBtn").click(function(){
+                // per
+                var perTypePage=$("#selectInputForPerType").val();
+                var curPermissionsLength=$("#curPer option").length;
+                
+                var error_res="";
+                var data_send="";   
+                
+                if(perTypePage==="Select Permission For"){
+                    error_res="<li>Select Properly</li>";
+                }
+
+                if(error_res.length!=0){                    
+                    $("#modal_message").empty();
+                    $("#modal_message").append("<ul>"+error_res+"</ul>");
+                    $('#error_modal').modal('show');
+                }
+                else{
+                
+
+                const optionValues = $('#curPer').find('option').map(function() {
+        return $(this).val();
+    }).get();
+
+
+                data_send={
+                    "type":"update",
+                    "user_id":checkboxChecked.id[0],
+                    "permissions":optionValues,
+                    "perType":perTypePage
+                }
+                    
+                
+                    $.ajax({
+                        type: "POST",
+                        url: './queries/managePermissions.php',
+                        data:  {data: data_send},
+                        success: function(response)
+                        {                                                        
+                            var responseData = JSON.parse(response);
+                            if(responseData[0].error_msg){                                
+                                alert(responseData[0].error_msg);
+                            }
+                            else{
+                                /*actionEditBtnClick();*/
+                                alert(responseData[0].ret_msg);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Ajax request failed with status: " + status + " and error: " + error);
+                            // You can provide a more user-friendly error message or handle errors as needed.
+                        }
+                    });                
+                }
+
+
+            })
+
+            $("#userRemoveBtn").click(function(){
+                var error_res="";
+
+               
+
+                if(error_res.length!=0){                    
+                    $("#modal_message").empty();
+                    $("#modal_message").append("<ul>"+error_res+"</ul>");
+                    $('#error_modal').modal('show');
+                }
+                else{
+                    const checkedCheckboxes = getAllCheckedCheckboxes();
+        const checkedIds = checkedCheckboxes.map(checkbox => checkbox.id);
+
+                    var data_send={
+                        user_id:checkedIds                        
+                    };
+
+                    $.ajax({
+                        type: "POST",
+                        url: './queries/removeUserFromFac.php',
+                        data:  {data: data_send},
+                        success: function(response)
+                        {                                                        
+                            var responseData = JSON.parse(response);
+                            if(responseData[0].error_msg){                                
+                                alert(responseData[0].error_msg);
+                            }
+                            else{           
+                                $("#modal_message").empty();
+                            $("#modal_message").append(responseData[0].ret_msg);
+                            $('#error_modal').modal('show');                                                                    
+
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Ajax request failed with status: " + status + " and error: " + error);
+                            // You can provide a more user-friendly error message or handle errors as needed.
+                        }
+                    });
+                }
+                          
+            });
+
+            
+            $("#searchBy").change(function(){          
+                var searchBy=$("#searchBy").val();                          
+                $("#searchUserFilterRow").empty();
+                $("#searchUserBtn").prop("disabled",true);
+                switch(searchBy){
+
+                    case "search_by":
+                        $("#modal_message").empty();
+                        $("#modal_message").append("<ul>Properly specify how you want to search user</ul>");
+                        $('#error_modal').modal('show');                        
+                        $("#searchUserBtn").prop("disabled",true);
+                    break;
+
+                    case "email_id":
+                        const colForEmail=$("<div>").addClass("col-md-4");
+                        const inputDiv=$("<div>").addClass("form-group");
+                        const inputEmailSearchLabel=$("<label>").text("User-ID/Email-ID (Required *)");
+                        const inputEmailSearch=$("<input>").attr({
+                            "type":"email",
+                            "id":"search_email_id",
+                            "placeholder":"Enter Email ID"
+                        }).prop("required",true).addClass("form-control");
+                        inputDiv.append(inputEmailSearchLabel);
+                        inputDiv.append(inputEmailSearch);
+                        colForEmail.append(inputDiv);
+                        $("#searchUserFilterRow").append(colForEmail);
+                        $("#searchUserBtn").prop("disabled",false);
+                    break;
+
+                    case "facility":
+                        
+                        // Create Search Form
+                                                
+                        const selectSearchLabel=$("<label>").text("Facility State (Required *)");
+                        const selectSearch=$("<select>").attr({                            
+                            "id":"search_fac_state",
+                            "onchange":"selectSearchChange()"
+                        }).addClass("form-control");
+                        
+                        const selectSearchLabelFac=$("<label>").text("Facility (Required *)");
+                        const selectSearchFac=$("<select>").attr({                            
+                            "id":"search_fac_state_facility_id",                            
+                        }).addClass("form-control").prop("disabled",true);
+
+                        const headersLabel = [selectSearchLabel, selectSearchLabelFac];
+                        const headers = [selectSearch, selectSearchFac];
+
+                        for(let i=0;i<2;i++){
+                            var colForSearch=$("<div>").addClass("col-md-4");
+                            var colForSearchDiv=$("<div>").addClass("form-group");
+                            colForSearchDiv.append(headersLabel[i]).append(headers[i]);                            
+                            colForSearch.append(colForSearchDiv);
+                            $("#searchUserFilterRow").append(colForSearch);
+                        }                                                                                            
+
+                        const states = [
+                                            "Select State", "Andhra Pradesh", "Andaman and Nicobar Islands", "Arunachal Pradesh", "Assam", "Bihar",
+    "Chandigarh", "Chhattisgarh", "Dadar and Nagar Haveli", "Daman and Diu", "Delhi", "Lakshadweep",
+    "Puducherry", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand",
+    "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
+    "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
+    "Uttarakhand", "West Bengal"
+  ];
+
+  const selectSearchOptions = $('#search_fac_state');
+  
+  $.each(states, function(index, state) {    
+    const option = $('<option>').attr("value",state).text(state);
+    selectSearchOptions.append(option);
+  });
+
+                        $("#searchUserBtn").prop("disabled",false);
+
+                        // Create Search Form                    
+
+                    break;
+
+                    case "list_all":                            
+                        const colForListAll=$("<div>").addClass("col-md-12").append("<B>Click on below search button to list all users</B>");                            
+                        $("#searchUserFilterRow").append(colForListAll);
+                        $("#searchUserBtn").prop("disabled",false);
+                    break;
+                }                
+            });
+            
+
+         
+
+
+            $("#searchUserForm").submit(function(e){
+                e.preventDefault();
+                
+                checkboxChecked.counter=0;
+
+                var error_res="";
+                var data_send="";
+
+                var searchBy=$("#searchBy").val();
+                switch(searchBy){
+                    case "email_id":
+                        if($("#searchUserForm #search_email_id").val().length===0){
+                            error_res=error_res+"<li>Enter User-ID/Email-ID Properly</li>";
+                        }
+                        else{
+                            data_send={
+                                "type":"emailID",
+                                "email_id":$("#searchUserForm #search_email_id").val()
+                            };                        
+                        }
+                    break;
+
+                    case "facility":
+                        if($("#searchUserForm #search_fac_state_facility_id").val()==="Select Branch"){
+                            error_res=error_res+"<li>Select Branch Properly</li>";
+                        }
+                        else{
+                            data_send={
+                                "type":"facID",
+                                "facility_id":$("#searchUserForm #search_fac_state_facility_id").val()
+                            };                        
+                        }
+                    break;
+
+                    case "list_all":
+                        data_send={
+                            "type":"listAll",
+                            "list_all":"yes"
+                        };                        
+                    break;
+
+                }
+                               
+                if(error_res.length!=0){                    
+                    $("#modal_message").empty();
+                    $("#modal_message").append("<ul>"+error_res+"</ul>");
+                    $('#error_modal').modal('show');
+                }
+                else{
+                    $.ajax({
+                        type: "POST",
+                        url: './queries/getUserData.php',
+                        data:  {data:data_send},
+                        success: function(response)
+                        {                            
+                            if(response.error_msg){ 
+                                alert(response.error_msg);
+
+                                if ($('#user_card_col').length > 0) {
+    // Element with ID 'elementId' exists
+    $("#user_card_col").remove();
+}
+                                
+
+                            }
+                            else{  
+                                                              
+                                
+                                if ($('#user_card_col').length > 0) {
+    // Element with ID 'elementId' exists
+    $("#user_card_col").remove();
+}
+
+
+                                const user_card_col=$("<div>").addClass("col-md-12").attr("id","user_card_col");
+                                const user_card=$("<div>").addClass("card");
+                                const user_card_header=$("<div>").addClass("card-header");
+                                const user_card_body=$("<div>").addClass("card-body");
+                                const user_card_header_h4=$("<h4>").addClass("card-title").append("User Details");
+                                user_card_header.append(user_card_header_h4);
+                                user_card.append(user_card_header);
+                                user_card.append(user_card_body);
+                                user_card_col.append(user_card);                                
+                                $("#search_collapse_body").append(user_card_col);
+                                                                                                                                            
+                                // Create the elements                                       
+                                const divCardBody = $('<div>').addClass('table-responsive').attr({
+                                    "style":"margin-top:15px"
+                                });
+                                const table = $('<table>').addClass('').attr('id','userDataTable');
+                                const thead = $('<thead>');
+                                const tbody = $('<tbody>').attr('id', 'fac_users_table');
+                                const headers = ['first_name', 'last_name', 'mobile_no', 'email_id', 'type', 'status'];
+                                
+                                // Create the header row
+                                const headerRow = $('<tr>');
+                                headerRow.append("<th>");
+                                headers.forEach(headerText => {
+                                    const th = $('<th>').text(headerText);
+                                    headerRow.append(th);
+                                });                        
+                                thead.append(headerRow);                                
+                                // Populate table with data from response.users_data
+                                $.each(response.users_data, function(index, getUserData) {
+                                    if (index < 10) { // Limiting to first 10 rows for overflow
+                                        const row = $('<tr>');
+                                        const checkbox=$('<input>').attr('type','checkbox').attr('id',getUserData.user_id).attr('onchange','checkboxChecked(this)');                            
+                                        const cell0=$('<td>');
+                                        cell0.append(checkbox);
+                                        row.append(cell0);                            
+                                        // Assuming getData is an object with properties corresponding to table headers
+                                        headers.forEach(header => {
+                                            const cell = $('<td>').text(getUserData[header.toLowerCase()].toLowerCase());
+                                            row.append(cell);
+                                        });                                                                                      
+                                        
+                                        tbody.append(row);
+                                    }
+                                });
+                        
+                                // Assemble the elements
+                                table.append(thead);
+                                table.append(tbody);
+                                                    
+                                const editBtn=$('<button>').attr('type','button').attr('id','actionEditBtn').addClass('btn btn-info').attr('onclick','actionEditBtnClick()').append('Edit/Remove Permissions');
+                                const delBtn=$('<button>').attr('type','button').attr('id','actionRemoveBtn').addClass('btn btn-danger').attr('onclick',"actionRemoveBtnClick()").append('Remove User');
+
+                                const action_col=$('<div>').addClass('col-md-3').append(editBtn);
+                                const action_col1=$('<div>').addClass('col-md-3').append(delBtn);                    
+                                const action_row=$('<div>').addClass('row').append(action_col).append(action_col1);
+                                                  
+                                divCardBody.append(table);         
+                                user_card_body.append(action_row);                       
+                                user_card_body.append(divCardBody); 
+                                                      
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Ajax request failed with status: " + status + " and error: " + error);
+                            // You can provide a more user-friendly error message or handle errors as needed.
+                        }   
+                    });
+                }                 
+
         });
+        <?php
+                }
+            ?>
+    });
 
     </script>
 
-
-    <!--<script>
-
-
-
-    function create () {
-        alert("Echo clicked");
-        $.ajax({
-            url:"test.php",    //the page containing php script
-            type: "post",    //request type,
-            dataType: 'json',
-            data: {registration: "success", name: "xyz", email: "abc@gmail.com"},
-            success:function(result){
-                console.log(result.abc);
-            }
-        });
-    }
-</script>-->
     
 </head>
     <link href="../assets/css/bootstrap.min.css" rel="stylesheet" />
  <!-- Mini Modal -->
- <div class="modal fade  modal-primary" id="error_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+ <div class="modal fade  modal-primary" id="error_modal" style='z-index:9999' tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <!--<div class="modal-header justify-content-center">
@@ -172,12 +1049,38 @@
 </div>
 <!--  End Modal -->
 
-    <div class="wrapper">
 
-        <?php
-            include("./includes/sidebar.php");
-        ?>     
-        <div class="main-panel">
+<!-- Modal -->
+<div class="modal fade bd-example-modal-lg" id="actions_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="actions_modal_title"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="actions_modal_body">
+        ...
+      </div>
+      <div class="modal-footer">        
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" id="perSaveBtn" class="btn btn-primary" style='display:none'>Save changes</button>
+        <button type="button" id="userRemoveBtn" class="btn btn-primary" style='display:none'>Remove Selected Users</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+
+
+<?php 
+
+        include("./includes/loaders.php");
+
+?>
+    <div class="wrapper">
+    
             
 
         <?php
@@ -188,835 +1091,217 @@
 
 
             <!-- Main Content -->
-            <div class="content">
+            <div class="content" style="margin-top:10px">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-12">
-                            <div class="card-body">
-                                <div class="card table-plain-bg">
-                                    <div class="card-header ">
-                                        <h4 class="card-title">Book Shipment</h4>
-                                        <p class="card-category">Enter Shipment Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
-                                    </div>
-                                <div class="card-body">
-                                    <form id="bookShipment" method="post">
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label>Shipment Type <span style="color:red;font-weight:bold">*</span></label>                                                                                                        
-                                                    <select class="form-control" id="shipment_type" name="shipment_type" required>
-                                                        <option value="Select Shipment Type">Select Shipment Type</option>
-                                                        <option value="BASIC">Basic</option>
-                                                        <option value="STANDARD">Standard</option>                                                        
-                                                        <option value="PREMIUM">Premium</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label>Shipment Weight (In Kg)<span style="color:red;font-weight:bold">*</span></label>
-                                                    <input type="number" id="shipment_weight" name="shipment_weight" class="form-control" placeholder="Enter Shipment Weight" required>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label>Shipment Delivery Method <span style="color:red;font-weight:bold">*</span></label>
-                                                    <select class="form-control" id="shipment_delivery_method" name="shipment_delivery_method" required>
-                                                        <option value="Select Delivery Method">Select Delivery Method</option>
-                                                        <option value="GND">Ground</option>
-                                                        <option value="AIR">Air</option>                                                        
-                                                        <option value="SEA">Water</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label>Shipment Content Type <span style="color:red;font-weight:bold">*</span></label>
-                                                    <select class="form-control" id="content_type" name="content_type" required>
-                                                        <option value="Select Shipment Content Type">Select Content Type</option>
-                                                        <option value="DOCUMENTS">Documents</option>
-                                                        <option value="FOOD">Food Items</option>
-                                                        <option value="FRAGILE">Fragile Items</option>
-                                                        <!-- Add more options as needed -->
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label>Shipment Cost (In Rupees) <span style="color:red;font-weight:bold">*</span></label>
-                                                    <input type="number" id="shipment_cost" name="shipment_cost" class="form-control" placeholder="Enter Shipment Cost" required>
-                                                </div>
-                                            </div>                                            
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label>Booking Date <span style="color:red;font-weight:bold">*</span></label>
-                                                    <input type="date" id="booking_date" name="booking_date" class="form-control" required>
-                                                    <!--<input type="datetime-local" id="booking_date" name="booking_date" class="form-control" required>-->
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label>Shipment Additional Information <span style="color:red;font-weight:bold">(Optional)</span></label>
-                                                    <textarea class="form-control" rows="5" id="additional_information" name="additional_information" placeholder="Enter Additional Information"></textarea>
-                                                </div>
-                                            </div>
-                                        </div>                                        
-                                        <div class="clearfix"></div>
-                                    
-                                </div>
-                            </div>   
-                        </div>   
-                        </div>   
-                        
-                        <div class="col-md-12">
-                            <div class="card-body">
-                                <div class="card table-plain-bg">
-                                    <div class="card-header ">
-                                        <h4 class="card-title">Sender Information</h4>
-                                        <p class="card-category">Enter Sender Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
-                                    </div>
-                                <div class="card-body">
-                                    
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="sender_full_name">Sender Full Name: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control"  id="sender_name" name="sender_name" placeholder="Sender's Full Name" required>
-                                            </div>
-                                        </div>                                        
-                                        
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="sender_email">Sender Email: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="email" class="form-control"  id="sender_email" name="sender_email" placeholder="Sender's Email" required>
-                                            </div> 
-                                        </div>
-                                        
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="sender_phone">Sender Phone Number:</label>
-                                                <input type="tel" class="form-control"  id="sender_phone" name="sender_phone" placeholder="Sender's Phone Number" maxlength="10" required>
-                                            </div>
-                                        </div>
+                    <?php
 
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="sender_address">Sender Address: <span style="color:red;font-weight:bold">*</span></label>
-                                                
-                                                <textarea class="form-control" rows="5" id="sender_address" name="sender_address" placeholder="Sender's Full Address" required></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                        
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="sender_city">Sender City: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control"  id="sender_city" name="sender_city" placeholder="Sender's City" required>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="sender_state">Sender State: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                <select id="sender_state" name="sender_state" class="form-control" required>
-                                                    <option value="Andhra Pradesh">Select State</option>
-                                                    <option value="Andhra Pradesh">Andhra Pradesh</option>
-                                                    <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-                                                    <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                                                    <option value="Assam">Assam</option>
-                                                    <option value="Bihar">Bihar</option>
-                                                    <option value="Chandigarh">Chandigarh</option>
-                                                    <option value="Chhattisgarh">Chhattisgarh</option>
-                                                    <option value="Dadar and Nagar Haveli">Dadar and Nagar Haveli</option>
-                                                    <option value="Daman and Diu">Daman and Diu</option>
-                                                    <option value="Delhi">Delhi</option>
-                                                    <option value="Lakshadweep">Lakshadweep</option>
-                                                    <option value="Puducherry">Puducherry</option>
-                                                    <option value="Goa">Goa</option>
-                                                    <option value="Gujarat">Gujarat</option>
-                                                    <option value="Haryana">Haryana</option>
-                                                    <option value="Himachal Pradesh">Himachal Pradesh</option>
-                                                    <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-                                                    <option value="Jharkhand">Jharkhand</option>
-                                                    <option value="Karnataka">Karnataka</option>
-                                                    <option value="Kerala">Kerala</option>
-                                                    <option value="Madhya Pradesh">Madhya Pradesh</option>
-                                                    <option value="Maharashtra">Maharashtra</option>
-                                                    <option value="Manipur">Manipur</option>
-                                                    <option value="Meghalaya">Meghalaya</option>
-                                                    <option value="Mizoram">Mizoram</option>
-                                                    <option value="Nagaland">Nagaland</option>
-                                                    <option value="Odisha">Odisha</option>
-                                                    <option value="Punjab">Punjab</option>
-                                                    <option value="Rajasthan">Rajasthan</option>
-                                                    <option value="Sikkim">Sikkim</option>
-                                                    <option value="Tamil Nadu">Tamil Nadu</option>
-                                                    <option value="Telangana">Telangana</option>
-                                                    <option value="Tripura">Tripura</option>
-                                                    <option value="Uttar Pradesh">Uttar Pradesh</option>
-                                                    <option value="Uttarakhand">Uttarakhand</option>
-                                                    <option value="West Bengal">West Bengal</option>
-                                                    </select>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="sender_country">Sender Country: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                <select id="sender_country" name="sender_country" class="form-control" required>
-                                                    <option value="India">India</option>
-                                                    <option value="Afghanistan">Afghanistan</option>
-                                                    <option value="Åland Islands">Åland Islands</option>
-                                                    <option value="Albania">Albania</option>
-                                                    <option value="Algeria">Algeria</option>
-                                                    <option value="American Samoa">American Samoa</option>
-                                                    <option value="Andorra">Andorra</option>
-                                                    <option value="Angola">Angola</option>
-                                                    <option value="Anguilla">Anguilla</option>
-                                                    <option value="Antarctica">Antarctica</option>
-                                                    <option value="Antigua and Barbuda">Antigua and Barbuda</option>
-                                                    <option value="Argentina">Argentina</option>
-                                                    <option value="Armenia">Armenia</option>
-                                                    <option value="Aruba">Aruba</option>
-                                                    <option value="Australia">Australia</option>
-                                                    <option value="Austria">Austria</option>
-                                                    <option value="Azerbaijan">Azerbaijan</option>
-                                                    <option value="Bahamas">Bahamas</option>
-                                                    <option value="Bahrain">Bahrain</option>
-                                                    <option value="Bangladesh">Bangladesh</option>
-                                                    <option value="Barbados">Barbados</option>
-                                                    <option value="Belarus">Belarus</option>
-                                                    <option value="Belgium">Belgium</option>
-                                                    <option value="Belize">Belize</option>
-                                                    <option value="Benin">Benin</option>
-                                                    <option value="Bermuda">Bermuda</option>
-                                                    <option value="Bhutan">Bhutan</option>
-                                                    <option value="Bolivia">Bolivia</option>
-                                                    <option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
-                                                    <option value="Botswana">Botswana</option>
-                                                    <option value="Bouvet Island">Bouvet Island</option>
-                                                    <option value="Brazil">Brazil</option>
-                                                    <option value="British Indian Ocean Territory">British Indian Ocean Territory</option>
-                                                    <option value="Brunei Darussalam">Brunei Darussalam</option>
-                                                    <option value="Bulgaria">Bulgaria</option>
-                                                    <option value="Burkina Faso">Burkina Faso</option>
-                                                    <option value="Burundi">Burundi</option>
-                                                    <option value="Cambodia">Cambodia</option>
-                                                    <option value="Cameroon">Cameroon</option>
-                                                    <option value="Canada">Canada</option>
-                                                    <option value="Cape Verde">Cape Verde</option>
-                                                    <option value="Cayman Islands">Cayman Islands</option>
-                                                    <option value="Central African Republic">Central African Republic</option>
-                                                    <option value="Chad">Chad</option>
-                                                    <option value="Chile">Chile</option>
-                                                    <option value="China">China</option>
-                                                    <option value="Christmas Island">Christmas Island</option>
-                                                    <option value="Cocos (Keeling) Islands">Cocos (Keeling) Islands</option>
-                                                    <option value="Colombia">Colombia</option>
-                                                    <option value="Comoros">Comoros</option>
-                                                    <option value="Congo">Congo</option>
-                                                    <option value="Congo, The Democratic Republic of The">Congo, The Democratic Republic of The</option>
-                                                    <option value="Cook Islands">Cook Islands</option>
-                                                    <option value="Costa Rica">Costa Rica</option>
-                                                    <option value="Cote D'ivoire">Cote D'ivoire</option>
-                                                    <option value="Croatia">Croatia</option>
-                                                    <option value="Cuba">Cuba</option>
-                                                    <option value="Cyprus">Cyprus</option>
-                                                    <option value="Czech Republic">Czech Republic</option>
-                                                    <option value="Denmark">Denmark</option>
-                                                    <option value="Djibouti">Djibouti</option>
-                                                    <option value="Dominica">Dominica</option>
-                                                    <option value="Dominican Republic">Dominican Republic</option>
-                                                    <option value="Ecuador">Ecuador</option>
-                                                    <option value="Egypt">Egypt</option>
-                                                    <option value="El Salvador">El Salvador</option>
-                                                    <option value="Equatorial Guinea">Equatorial Guinea</option>
-                                                    <option value="Eritrea">Eritrea</option>
-                                                    <option value="Estonia">Estonia</option>
-                                                    <option value="Ethiopia">Ethiopia</option>
-                                                    <option value="Falkland Islands (Malvinas)">Falkland Islands (Malvinas)</option>
-                                                    <option value="Faroe Islands">Faroe Islands</option>
-                                                    <option value="Fiji">Fiji</option>
-                                                    <option value="Finland">Finland</option>
-                                                    <option value="France">France</option>
-                                                    <option value="French Guiana">French Guiana</option>
-                                                    <option value="French Polynesia">French Polynesia</option>
-                                                    <option value="French Southern Territories">French Southern Territories</option>
-                                                    <option value="Gabon">Gabon</option>
-                                                    <option value="Gambia">Gambia</option>
-                                                    <option value="Georgia">Georgia</option>
-                                                    <option value="Germany">Germany</option>
-                                                    <option value="Ghana">Ghana</option>
-                                                    <option value="Gibraltar">Gibraltar</option>
-                                                    <option value="Greece">Greece</option>
-                                                    <option value="Greenland">Greenland</option>
-                                                    <option value="Grenada">Grenada</option>
-                                                    <option value="Guadeloupe">Guadeloupe</option>
-                                                    <option value="Guam">Guam</option>
-                                                    <option value="Guatemala">Guatemala</option>
-                                                    <option value="Guernsey">Guernsey</option>
-                                                    <option value="Guinea">Guinea</option>
-                                                    <option value="Guinea-bissau">Guinea-bissau</option>
-                                                    <option value="Guyana">Guyana</option>
-                                                    <option value="Haiti">Haiti</option>
-                                                    <option value="Heard Island and Mcdonald Islands">Heard Island and Mcdonald Islands</option>
-                                                    <option value="Holy See (Vatican City State)">Holy See (Vatican City State)</option>
-                                                    <option value="Honduras">Honduras</option>
-                                                    <option value="Hong Kong">Hong Kong</option>
-                                                    <option value="Hungary">Hungary</option>
-                                                    <option value="Iceland">Iceland</option>
-                                                    <option value="India">India</option>
-                                                    <option value="Indonesia">Indonesia</option>
-                                                    <option value="Iran, Islamic Republic of">Iran, Islamic Republic of</option>
-                                                    <option value="Iraq">Iraq</option>
-                                                    <option value="Ireland">Ireland</option>
-                                                    <option value="Isle of Man">Isle of Man</option>
-                                                    <option value="Israel">Israel</option>
-                                                    <option value="Italy">Italy</option>
-                                                    <option value="Jamaica">Jamaica</option>
-                                                    <option value="Japan">Japan</option>
-                                                    <option value="Jersey">Jersey</option>
-                                                    <option value="Jordan">Jordan</option>
-                                                    <option value="Kazakhstan">Kazakhstan</option>
-                                                    <option value="Kenya">Kenya</option>
-                                                    <option value="Kiribati">Kiribati</option>
-                                                    <option value="Korea, Democratic People's Republic of">Korea, Democratic People's Republic of</option>
-                                                    <option value="Korea, Republic of">Korea, Republic of</option>
-                                                    <option value="Kuwait">Kuwait</option>
-                                                    <option value="Kyrgyzstan">Kyrgyzstan</option>
-                                                    <option value="Lao People's Democratic Republic">Lao People's Democratic Republic</option>
-                                                    <option value="Latvia">Latvia</option>
-                                                    <option value="Lebanon">Lebanon</option>
-                                                    <option value="Lesotho">Lesotho</option>
-                                                    <option value="Liberia">Liberia</option>
-                                                    <option value="Libyan Arab Jamahiriya">Libyan Arab Jamahiriya</option>
-                                                    <option value="Liechtenstein">Liechtenstein</option>
-                                                    <option value="Lithuania">Lithuania</option>
-                                                    <option value="Luxembourg">Luxembourg</option>
-                                                    <option value="Macao">Macao</option>
-                                                    <option value="Macedonia, The Former Yugoslav Republic of">Macedonia, The Former Yugoslav Republic of</option>
-                                                    <option value="Madagascar">Madagascar</option>
-                                                    <option value="Malawi">Malawi</option>
-                                                    <option value="Malaysia">Malaysia</option>
-                                                    <option value="Maldives">Maldives</option>
-                                                    <option value="Mali">Mali</option>
-                                                    <option value="Malta">Malta</option>
-                                                    <option value="Marshall Islands">Marshall Islands</option>
-                                                    <option value="Martinique">Martinique</option>
-                                                    <option value="Mauritania">Mauritania</option>
-                                                    <option value="Mauritius">Mauritius</option>
-                                                    <option value="Mayotte">Mayotte</option>
-                                                    <option value="Mexico">Mexico</option>
-                                                    <option value="Micronesia, Federated States of">Micronesia, Federated States of</option>
-                                                    <option value="Moldova, Republic of">Moldova, Republic of</option>
-                                                    <option value="Monaco">Monaco</option>
-                                                    <option value="Mongolia">Mongolia</option>
-                                                    <option value="Montenegro">Montenegro</option>
-                                                    <option value="Montserrat">Montserrat</option>
-                                                    <option value="Morocco">Morocco</option>
-                                                    <option value="Mozambique">Mozambique</option>
-                                                    <option value="Myanmar">Myanmar</option>
-                                                    <option value="Namibia">Namibia</option>
-                                                    <option value="Nauru">Nauru</option>
-                                                    <option value="Nepal">Nepal</option>
-                                                    <option value="Netherlands">Netherlands</option>
-                                                    <option value="Netherlands Antilles">Netherlands Antilles</option>
-                                                    <option value="New Caledonia">New Caledonia</option>
-                                                    <option value="New Zealand">New Zealand</option>
-                                                    <option value="Nicaragua">Nicaragua</option>
-                                                    <option value="Niger">Niger</option>
-                                                    <option value="Nigeria">Nigeria</option>
-                                                    <option value="Niue">Niue</option>
-                                                    <option value="Norfolk Island">Norfolk Island</option>
-                                                    <option value="Northern Mariana Islands">Northern Mariana Islands</option>
-                                                    <option value="Norway">Norway</option>
-                                                    <option value="Oman">Oman</option>
-                                                    <option value="Pakistan">Pakistan</option>
-                                                    <option value="Palau">Palau</option>
-                                                    <option value="Palestinian Territory, Occupied">Palestinian Territory, Occupied</option>
-                                                    <option value="Panama">Panama</option>
-                                                    <option value="Papua New Guinea">Papua New Guinea</option>
-                                                    <option value="Paraguay">Paraguay</option>
-                                                    <option value="Peru">Peru</option>
-                                                    <option value="Philippines">Philippines</option>
-                                                    <option value="Pitcairn">Pitcairn</option>
-                                                    <option value="Poland">Poland</option>
-                                                    <option value="Portugal">Portugal</option>
-                                                    <option value="Puerto Rico">Puerto Rico</option>
-                                                    <option value="Qatar">Qatar</option>
-                                                    <option value="Reunion">Reunion</option>
-                                                    <option value="Romania">Romania</option>
-                                                    <option value="Russian Federation">Russian Federation</option>
-                                                    <option value="Rwanda">Rwanda</option>
-                                                    <option value="Saint Helena">Saint Helena</option>
-                                                    <option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option>
-                                                    <option value="Saint Lucia">Saint Lucia</option>
-                                                    <option value="Saint Pierre and Miquelon">Saint Pierre and Miquelon</option>
-                                                    <option value="Saint Vincent and The Grenadines">Saint Vincent and The Grenadines</option>
-                                                    <option value="Samoa">Samoa</option>
-                                                    <option value="San Marino">San Marino</option>
-                                                    <option value="Sao Tome and Principe">Sao Tome and Principe</option>
-                                                    <option value="Saudi Arabia">Saudi Arabia</option>
-                                                    <option value="Senegal">Senegal</option>
-                                                    <option value="Serbia">Serbia</option>
-                                                    <option value="Seychelles">Seychelles</option>
-                                                    <option value="Sierra Leone">Sierra Leone</option>
-                                                    <option value="Singapore">Singapore</option>
-                                                    <option value="Slovakia">Slovakia</option>
-                                                    <option value="Slovenia">Slovenia</option>
-                                                    <option value="Solomon Islands">Solomon Islands</option>
-                                                    <option value="Somalia">Somalia</option>
-                                                    <option value="South Africa">South Africa</option>
-                                                    <option value="South Georgia and The South Sandwich Islands">South Georgia and The South Sandwich Islands</option>
-                                                    <option value="Spain">Spain</option>
-                                                    <option value="Sri Lanka">Sri Lanka</option>
-                                                    <option value="Sudan">Sudan</option>
-                                                    <option value="Suriname">Suriname</option>
-                                                    <option value="Svalbard and Jan Mayen">Svalbard and Jan Mayen</option>
-                                                    <option value="Swaziland">Swaziland</option>
-                                                    <option value="Sweden">Sweden</option>
-                                                    <option value="Switzerland">Switzerland</option>
-                                                    <option value="Syrian Arab Republic">Syrian Arab Republic</option>
-                                                    <option value="Taiwan">Taiwan</option>
-                                                    <option value="Tajikistan">Tajikistan</option>
-                                                    <option value="Tanzania, United Republic of">Tanzania, United Republic of</option>
-                                                    <option value="Thailand">Thailand</option>
-                                                    <option value="Timor-leste">Timor-leste</option>
-                                                    <option value="Togo">Togo</option>
-                                                    <option value="Tokelau">Tokelau</option>
-                                                    <option value="Tonga">Tonga</option>
-                                                    <option value="Trinidad and Tobago">Trinidad and Tobago</option>
-                                                    <option value="Tunisia">Tunisia</option>
-                                                    <option value="Turkey">Turkey</option>
-                                                    <option value="Turkmenistan">Turkmenistan</option>
-                                                    <option value="Turks and Caicos Islands">Turks and Caicos Islands</option>
-                                                    <option value="Tuvalu">Tuvalu</option>
-                                                    <option value="Uganda">Uganda</option>
-                                                    <option value="Ukraine">Ukraine</option>
-                                                    <option value="United Arab Emirates">United Arab Emirates</option>
-                                                    <option value="United Kingdom">United Kingdom</option>
-                                                    <option value="United States">United States</option>
-                                                    <option value="United States Minor Outlying Islands">United States Minor Outlying Islands</option>
-                                                    <option value="Uruguay">Uruguay</option>
-                                                    <option value="Uzbekistan">Uzbekistan</option>
-                                                    <option value="Vanuatu">Vanuatu</option>
-                                                    <option value="Venezuela">Venezuela</option>
-                                                    <option value="Viet Nam">Viet Nam</option>
-                                                    <option value="Virgin Islands, British">Virgin Islands, British</option>
-                                                    <option value="Virgin Islands, U.S.">Virgin Islands, U.S.</option>
-                                                    <option value="Wallis and Futuna">Wallis and Futuna</option>
-                                                    <option value="Western Sahara">Western Sahara</option>
-                                                    <option value="Yemen">Yemen</option>
-                                                    <option value="Zambia">Zambia</option>
-                                                    <option value="Zimbabwe">Zimbabwe</option>
-                                                    </select>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="sender_pincode">Sender Pincode: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="number" class="form-control" id="sender_pincode" name="sender_pincode" placeholder="Sender's Pincode" minlength="6" maxlength="6" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
+include("./includes/quick_links.php");
+
+?>
+
+                      <!-- Main Menu -->
+                      <div class="col-md-12" id="fac_details" >
+                            <div class="card">
+                                <div class="card-header">                                    
+                                <div class="tab">
+
+                                    <button class="tablinks" id="fac_collapse_body_btn" onclick="openCity(event, 'search_collapse_body')">Search User</button>                                    
+                                    <button class="tablinks" id="users_collapse_body_btn" onclick="openCity(event, 'create_collapse_body')">Create User</button>                                    
+                                </div>      
+                                    <hr/>                                  
                                 </div>
-                            </div>   
-                        </div>   
-                        </div>
+                                <!-- Collapse cards -->
+                                <div class="tabcontent" id="search_collapse_body">
+                                    <div class="card-body">
 
-                        <div class="col-md-12">
-                            <div class="card-body">
-                                <div class="card table-plain-bg">
-                                    <div class="card-header ">
-                                        <h4 class="card-title">Receiver Information</h4>
-                                        <p class="card-category">Enter Receiver Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
-                                    </div>
-                                <div class="card-body">
+                                    <?php 
                                     
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="Receiver_full_name">Receiver Full Name: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control"  id="Receiver_name" name="Receiver_name" placeholder="Receiver's Full Name" required>
-                                            </div>
-                                        </div>                                        
-                                        
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="Receiver_email">Receiver Email: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="email" class="form-control"  id="Receiver_email" name="Receiver_email" placeholder="Receiver's Email" required>
-                                            </div> 
-                                        </div>
-                                        
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="Receiver_phone">Receiver Phone Number: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="tel" class="form-control"  id="Receiver_phone" name="Receiver_phone" placeholder="Receiver's Phone Number" maxlength="10" required>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="Receiver_address">Receiver Address: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control"  id="Receiver_address" name="Receiver_address" placeholder="Receiver's Address" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                        
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="Receiver_city">Receiver City: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="text" class="form-control"  id="Receiver_city" name="Receiver_city" placeholder="Receiver's City" required>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="Receiver_state">Receiver State: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                <select id="receiver_state" name="receiver_state" class="form-control" required>
-                                                    <option value="Andhra Pradesh">Select State</option>
-                                                    <option value="Andhra Pradesh">Andhra Pradesh</option>
-                                                    <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-                                                    <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                                                    <option value="Assam">Assam</option>
-                                                    <option value="Bihar">Bihar</option>
-                                                    <option value="Chandigarh">Chandigarh</option>
-                                                    <option value="Chhattisgarh">Chhattisgarh</option>
-                                                    <option value="Dadar and Nagar Haveli">Dadar and Nagar Haveli</option>
-                                                    <option value="Daman and Diu">Daman and Diu</option>
-                                                    <option value="Delhi">Delhi</option>
-                                                    <option value="Lakshadweep">Lakshadweep</option>
-                                                    <option value="Puducherry">Puducherry</option>
-                                                    <option value="Goa">Goa</option>
-                                                    <option value="Gujarat">Gujarat</option>
-                                                    <option value="Haryana">Haryana</option>
-                                                    <option value="Himachal Pradesh">Himachal Pradesh</option>
-                                                    <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-                                                    <option value="Jharkhand">Jharkhand</option>
-                                                    <option value="Karnataka">Karnataka</option>
-                                                    <option value="Kerala">Kerala</option>
-                                                    <option value="Madhya Pradesh">Madhya Pradesh</option>
-                                                    <option value="Maharashtra">Maharashtra</option>
-                                                    <option value="Manipur">Manipur</option>
-                                                    <option value="Meghalaya">Meghalaya</option>
-                                                    <option value="Mizoram">Mizoram</option>
-                                                    <option value="Nagaland">Nagaland</option>
-                                                    <option value="Odisha">Odisha</option>
-                                                    <option value="Punjab">Punjab</option>
-                                                    <option value="Rajasthan">Rajasthan</option>
-                                                    <option value="Sikkim">Sikkim</option>
-                                                    <option value="Tamil Nadu">Tamil Nadu</option>
-                                                    <option value="Telangana">Telangana</option>
-                                                    <option value="Tripura">Tripura</option>
-                                                    <option value="Uttar Pradesh">Uttar Pradesh</option>
-                                                    <option value="Uttarakhand">Uttarakhand</option>
-                                                    <option value="West Bengal">West Bengal</option>
-                                                    </select>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="Receiver_country">Receiver Country: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                <select id="receiver_country" name="receiver_country" class="form-control" required>
-                                                    <option value="India">India</option>
-                                                    <option value="Afghanistan">Afghanistan</option>
-                                                    <option value="Åland Islands">Åland Islands</option>
-                                                    <option value="Albania">Albania</option>
-                                                    <option value="Algeria">Algeria</option>
-                                                    <option value="American Samoa">American Samoa</option>
-                                                    <option value="Andorra">Andorra</option>
-                                                    <option value="Angola">Angola</option>
-                                                    <option value="Anguilla">Anguilla</option>
-                                                    <option value="Antarctica">Antarctica</option>
-                                                    <option value="Antigua and Barbuda">Antigua and Barbuda</option>
-                                                    <option value="Argentina">Argentina</option>
-                                                    <option value="Armenia">Armenia</option>
-                                                    <option value="Aruba">Aruba</option>
-                                                    <option value="Australia">Australia</option>
-                                                    <option value="Austria">Austria</option>
-                                                    <option value="Azerbaijan">Azerbaijan</option>
-                                                    <option value="Bahamas">Bahamas</option>
-                                                    <option value="Bahrain">Bahrain</option>
-                                                    <option value="Bangladesh">Bangladesh</option>
-                                                    <option value="Barbados">Barbados</option>
-                                                    <option value="Belarus">Belarus</option>
-                                                    <option value="Belgium">Belgium</option>
-                                                    <option value="Belize">Belize</option>
-                                                    <option value="Benin">Benin</option>
-                                                    <option value="Bermuda">Bermuda</option>
-                                                    <option value="Bhutan">Bhutan</option>
-                                                    <option value="Bolivia">Bolivia</option>
-                                                    <option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
-                                                    <option value="Botswana">Botswana</option>
-                                                    <option value="Bouvet Island">Bouvet Island</option>
-                                                    <option value="Brazil">Brazil</option>
-                                                    <option value="British Indian Ocean Territory">British Indian Ocean Territory</option>
-                                                    <option value="Brunei Darussalam">Brunei Darussalam</option>
-                                                    <option value="Bulgaria">Bulgaria</option>
-                                                    <option value="Burkina Faso">Burkina Faso</option>
-                                                    <option value="Burundi">Burundi</option>
-                                                    <option value="Cambodia">Cambodia</option>
-                                                    <option value="Cameroon">Cameroon</option>
-                                                    <option value="Canada">Canada</option>
-                                                    <option value="Cape Verde">Cape Verde</option>
-                                                    <option value="Cayman Islands">Cayman Islands</option>
-                                                    <option value="Central African Republic">Central African Republic</option>
-                                                    <option value="Chad">Chad</option>
-                                                    <option value="Chile">Chile</option>
-                                                    <option value="China">China</option>
-                                                    <option value="Christmas Island">Christmas Island</option>
-                                                    <option value="Cocos (Keeling) Islands">Cocos (Keeling) Islands</option>
-                                                    <option value="Colombia">Colombia</option>
-                                                    <option value="Comoros">Comoros</option>
-                                                    <option value="Congo">Congo</option>
-                                                    <option value="Congo, The Democratic Republic of The">Congo, The Democratic Republic of The</option>
-                                                    <option value="Cook Islands">Cook Islands</option>
-                                                    <option value="Costa Rica">Costa Rica</option>
-                                                    <option value="Cote D'ivoire">Cote D'ivoire</option>
-                                                    <option value="Croatia">Croatia</option>
-                                                    <option value="Cuba">Cuba</option>
-                                                    <option value="Cyprus">Cyprus</option>
-                                                    <option value="Czech Republic">Czech Republic</option>
-                                                    <option value="Denmark">Denmark</option>
-                                                    <option value="Djibouti">Djibouti</option>
-                                                    <option value="Dominica">Dominica</option>
-                                                    <option value="Dominican Republic">Dominican Republic</option>
-                                                    <option value="Ecuador">Ecuador</option>
-                                                    <option value="Egypt">Egypt</option>
-                                                    <option value="El Salvador">El Salvador</option>
-                                                    <option value="Equatorial Guinea">Equatorial Guinea</option>
-                                                    <option value="Eritrea">Eritrea</option>
-                                                    <option value="Estonia">Estonia</option>
-                                                    <option value="Ethiopia">Ethiopia</option>
-                                                    <option value="Falkland Islands (Malvinas)">Falkland Islands (Malvinas)</option>
-                                                    <option value="Faroe Islands">Faroe Islands</option>
-                                                    <option value="Fiji">Fiji</option>
-                                                    <option value="Finland">Finland</option>
-                                                    <option value="France">France</option>
-                                                    <option value="French Guiana">French Guiana</option>
-                                                    <option value="French Polynesia">French Polynesia</option>
-                                                    <option value="French Southern Territories">French Southern Territories</option>
-                                                    <option value="Gabon">Gabon</option>
-                                                    <option value="Gambia">Gambia</option>
-                                                    <option value="Georgia">Georgia</option>
-                                                    <option value="Germany">Germany</option>
-                                                    <option value="Ghana">Ghana</option>
-                                                    <option value="Gibraltar">Gibraltar</option>
-                                                    <option value="Greece">Greece</option>
-                                                    <option value="Greenland">Greenland</option>
-                                                    <option value="Grenada">Grenada</option>
-                                                    <option value="Guadeloupe">Guadeloupe</option>
-                                                    <option value="Guam">Guam</option>
-                                                    <option value="Guatemala">Guatemala</option>
-                                                    <option value="Guernsey">Guernsey</option>
-                                                    <option value="Guinea">Guinea</option>
-                                                    <option value="Guinea-bissau">Guinea-bissau</option>
-                                                    <option value="Guyana">Guyana</option>
-                                                    <option value="Haiti">Haiti</option>
-                                                    <option value="Heard Island and Mcdonald Islands">Heard Island and Mcdonald Islands</option>
-                                                    <option value="Holy See (Vatican City State)">Holy See (Vatican City State)</option>
-                                                    <option value="Honduras">Honduras</option>
-                                                    <option value="Hong Kong">Hong Kong</option>
-                                                    <option value="Hungary">Hungary</option>
-                                                    <option value="Iceland">Iceland</option>
-                                                    <option value="India">India</option>
-                                                    <option value="Indonesia">Indonesia</option>
-                                                    <option value="Iran, Islamic Republic of">Iran, Islamic Republic of</option>
-                                                    <option value="Iraq">Iraq</option>
-                                                    <option value="Ireland">Ireland</option>
-                                                    <option value="Isle of Man">Isle of Man</option>
-                                                    <option value="Israel">Israel</option>
-                                                    <option value="Italy">Italy</option>
-                                                    <option value="Jamaica">Jamaica</option>
-                                                    <option value="Japan">Japan</option>
-                                                    <option value="Jersey">Jersey</option>
-                                                    <option value="Jordan">Jordan</option>
-                                                    <option value="Kazakhstan">Kazakhstan</option>
-                                                    <option value="Kenya">Kenya</option>
-                                                    <option value="Kiribati">Kiribati</option>
-                                                    <option value="Korea, Democratic People's Republic of">Korea, Democratic People's Republic of</option>
-                                                    <option value="Korea, Republic of">Korea, Republic of</option>
-                                                    <option value="Kuwait">Kuwait</option>
-                                                    <option value="Kyrgyzstan">Kyrgyzstan</option>
-                                                    <option value="Lao People's Democratic Republic">Lao People's Democratic Republic</option>
-                                                    <option value="Latvia">Latvia</option>
-                                                    <option value="Lebanon">Lebanon</option>
-                                                    <option value="Lesotho">Lesotho</option>
-                                                    <option value="Liberia">Liberia</option>
-                                                    <option value="Libyan Arab Jamahiriya">Libyan Arab Jamahiriya</option>
-                                                    <option value="Liechtenstein">Liechtenstein</option>
-                                                    <option value="Lithuania">Lithuania</option>
-                                                    <option value="Luxembourg">Luxembourg</option>
-                                                    <option value="Macao">Macao</option>
-                                                    <option value="Macedonia, The Former Yugoslav Republic of">Macedonia, The Former Yugoslav Republic of</option>
-                                                    <option value="Madagascar">Madagascar</option>
-                                                    <option value="Malawi">Malawi</option>
-                                                    <option value="Malaysia">Malaysia</option>
-                                                    <option value="Maldives">Maldives</option>
-                                                    <option value="Mali">Mali</option>
-                                                    <option value="Malta">Malta</option>
-                                                    <option value="Marshall Islands">Marshall Islands</option>
-                                                    <option value="Martinique">Martinique</option>
-                                                    <option value="Mauritania">Mauritania</option>
-                                                    <option value="Mauritius">Mauritius</option>
-                                                    <option value="Mayotte">Mayotte</option>
-                                                    <option value="Mexico">Mexico</option>
-                                                    <option value="Micronesia, Federated States of">Micronesia, Federated States of</option>
-                                                    <option value="Moldova, Republic of">Moldova, Republic of</option>
-                                                    <option value="Monaco">Monaco</option>
-                                                    <option value="Mongolia">Mongolia</option>
-                                                    <option value="Montenegro">Montenegro</option>
-                                                    <option value="Montserrat">Montserrat</option>
-                                                    <option value="Morocco">Morocco</option>
-                                                    <option value="Mozambique">Mozambique</option>
-                                                    <option value="Myanmar">Myanmar</option>
-                                                    <option value="Namibia">Namibia</option>
-                                                    <option value="Nauru">Nauru</option>
-                                                    <option value="Nepal">Nepal</option>
-                                                    <option value="Netherlands">Netherlands</option>
-                                                    <option value="Netherlands Antilles">Netherlands Antilles</option>
-                                                    <option value="New Caledonia">New Caledonia</option>
-                                                    <option value="New Zealand">New Zealand</option>
-                                                    <option value="Nicaragua">Nicaragua</option>
-                                                    <option value="Niger">Niger</option>
-                                                    <option value="Nigeria">Nigeria</option>
-                                                    <option value="Niue">Niue</option>
-                                                    <option value="Norfolk Island">Norfolk Island</option>
-                                                    <option value="Northern Mariana Islands">Northern Mariana Islands</option>
-                                                    <option value="Norway">Norway</option>
-                                                    <option value="Oman">Oman</option>
-                                                    <option value="Pakistan">Pakistan</option>
-                                                    <option value="Palau">Palau</option>
-                                                    <option value="Palestinian Territory, Occupied">Palestinian Territory, Occupied</option>
-                                                    <option value="Panama">Panama</option>
-                                                    <option value="Papua New Guinea">Papua New Guinea</option>
-                                                    <option value="Paraguay">Paraguay</option>
-                                                    <option value="Peru">Peru</option>
-                                                    <option value="Philippines">Philippines</option>
-                                                    <option value="Pitcairn">Pitcairn</option>
-                                                    <option value="Poland">Poland</option>
-                                                    <option value="Portugal">Portugal</option>
-                                                    <option value="Puerto Rico">Puerto Rico</option>
-                                                    <option value="Qatar">Qatar</option>
-                                                    <option value="Reunion">Reunion</option>
-                                                    <option value="Romania">Romania</option>
-                                                    <option value="Russian Federation">Russian Federation</option>
-                                                    <option value="Rwanda">Rwanda</option>
-                                                    <option value="Saint Helena">Saint Helena</option>
-                                                    <option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option>
-                                                    <option value="Saint Lucia">Saint Lucia</option>
-                                                    <option value="Saint Pierre and Miquelon">Saint Pierre and Miquelon</option>
-                                                    <option value="Saint Vincent and The Grenadines">Saint Vincent and The Grenadines</option>
-                                                    <option value="Samoa">Samoa</option>
-                                                    <option value="San Marino">San Marino</option>
-                                                    <option value="Sao Tome and Principe">Sao Tome and Principe</option>
-                                                    <option value="Saudi Arabia">Saudi Arabia</option>
-                                                    <option value="Senegal">Senegal</option>
-                                                    <option value="Serbia">Serbia</option>
-                                                    <option value="Seychelles">Seychelles</option>
-                                                    <option value="Sierra Leone">Sierra Leone</option>
-                                                    <option value="Singapore">Singapore</option>
-                                                    <option value="Slovakia">Slovakia</option>
-                                                    <option value="Slovenia">Slovenia</option>
-                                                    <option value="Solomon Islands">Solomon Islands</option>
-                                                    <option value="Somalia">Somalia</option>
-                                                    <option value="South Africa">South Africa</option>
-                                                    <option value="South Georgia and The South Sandwich Islands">South Georgia and The South Sandwich Islands</option>
-                                                    <option value="Spain">Spain</option>
-                                                    <option value="Sri Lanka">Sri Lanka</option>
-                                                    <option value="Sudan">Sudan</option>
-                                                    <option value="Suriname">Suriname</option>
-                                                    <option value="Svalbard and Jan Mayen">Svalbard and Jan Mayen</option>
-                                                    <option value="Swaziland">Swaziland</option>
-                                                    <option value="Sweden">Sweden</option>
-                                                    <option value="Switzerland">Switzerland</option>
-                                                    <option value="Syrian Arab Republic">Syrian Arab Republic</option>
-                                                    <option value="Taiwan">Taiwan</option>
-                                                    <option value="Tajikistan">Tajikistan</option>
-                                                    <option value="Tanzania, United Republic of">Tanzania, United Republic of</option>
-                                                    <option value="Thailand">Thailand</option>
-                                                    <option value="Timor-leste">Timor-leste</option>
-                                                    <option value="Togo">Togo</option>
-                                                    <option value="Tokelau">Tokelau</option>
-                                                    <option value="Tonga">Tonga</option>
-                                                    <option value="Trinidad and Tobago">Trinidad and Tobago</option>
-                                                    <option value="Tunisia">Tunisia</option>
-                                                    <option value="Turkey">Turkey</option>
-                                                    <option value="Turkmenistan">Turkmenistan</option>
-                                                    <option value="Turks and Caicos Islands">Turks and Caicos Islands</option>
-                                                    <option value="Tuvalu">Tuvalu</option>
-                                                    <option value="Uganda">Uganda</option>
-                                                    <option value="Ukraine">Ukraine</option>
-                                                    <option value="United Arab Emirates">United Arab Emirates</option>
-                                                    <option value="United Kingdom">United Kingdom</option>
-                                                    <option value="United States">United States</option>
-                                                    <option value="United States Minor Outlying Islands">United States Minor Outlying Islands</option>
-                                                    <option value="Uruguay">Uruguay</option>
-                                                    <option value="Uzbekistan">Uzbekistan</option>
-                                                    <option value="Vanuatu">Vanuatu</option>
-                                                    <option value="Venezuela">Venezuela</option>
-                                                    <option value="Viet Nam">Viet Nam</option>
-                                                    <option value="Virgin Islands, British">Virgin Islands, British</option>
-                                                    <option value="Virgin Islands, U.S.">Virgin Islands, U.S.</option>
-                                                    <option value="Wallis and Futuna">Wallis and Futuna</option>
-                                                    <option value="Western Sahara">Western Sahara</option>
-                                                    <option value="Yemen">Yemen</option>
-                                                    <option value="Zambia">Zambia</option>
-                                                    <option value="Zimbabwe">Zimbabwe</option>
-                                                    </select>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="Receiver_pincode">Receiver Pincode: <span style="color:red;font-weight:bold">*</span></label>
-                                                <input type="number" class="form-control" id="Receiver_pincode" name="Receiver_pincode" placeholder="Receiver's Pincode" minlength="6" maxlength="6" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                </div>
-                            </div>   
-                        </div>   
-                    </div>
-
-                        <!-- Payment Type -->
-                        <div class="col-md-12">
-                            <div class="card-body">
-                                <div class="card table-plain-bg">
-                                    <div class="card-header ">
-                                        <h4 class="card-title">Payment Details</h4>
-                                        <p class="card-category">Enter payment Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
-                                    </div>
-                                <div class="card-body">
-                                    
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>Payment Mode <span style="color:red;font-weight:bold">*</span></label>
-                                                    <select class="form-control" name="payment_type" id="payment_type" required>
-                                                        <option >Select Payment Method</option>
-                                                        <option value="Online At Booking">Online - At Booking</option>
-                                                        <option value="Offline - At Booking">Offline - At Booking</option>                                                        
-                                                        <option value="Offline - Cash on Delivery">Offline - Cash on Delivery</option>
-                                                    </select>
+                                        if($retPerData!="-1" && $retPerData!="0"){
+                                            
+                                            
+                                            if(in_array("users_php_VIEW_USERS",$retPerData)){                                                                                        
+                                            ?>
+                                            
+                                        <!-- Search User -->   
+                                            <div class="card table-plain-bg">
+                                                <div class="card-header ">
+                                                    <h4 class="card-title">Search User</h4>                                                    
                                                 </div>
-                                            </div>                                            
-                                        </div>
-                                        <button type="submit" class="btn btn-info btn-fill pull-right">Submit</button>
-                                    </form>
+                                                <div class="card-body">
+                                                    <form id="searchUserForm" method="post"> 
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <label>Search By</label>
+                                                                <select name="searchBy" id="searchBy">
+                                                                    <option value="search_by">Search User By</option>
+                                                                    <option value="email_id">User-ID/Email-ID</option>
+                                                                    <?php if($_SESSION['type']==="SADMIN") { ?>
+                                                                    <option value="facility">Facility</option>
+                                                                    <?php } ?>
+                                                                    <option value="list_all">List All Users</option>
+                                                                </select>
+                                                            </div>                                                            
+                                                        </div>    
+                                                        <hr/>                                                                                               
+                                                        <div class="row" id="searchUserFilterRow">
+                                                        </div>                                                                                                                                                                                                                             
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <button type="submit" id="searchUserBtn" class="form-control btn btn-warning" disabled>Search</button>
+                                                            </div>
+                                                        </div>                                    
+                                                        <div class="clearfix"></div>   
+                                                    </form>
+                                                </div>
+                                            </div>
+                                    <!-- Search User -->            
+                                    <?php
+                                        }
+                                        else{
+                                            echo "You do not have permission to search users";
+                                        }                                                                           
+                                    ?>                                
+                                    </div>
                                 </div>
-                            </div>   
-                        </div>   
-                        </div>  
-                        <!-- Payment Type Close -->
+                                <div class="tabcontent" id="create_collapse_body">
+                                    <div class="card-body">       
+                                        <?php 
+
+                                            if(in_array("users_php_CREATE_USER",$retPerData)){
+
+                                            ?>
+                                        <!-- Create user -->   
+                                                <div class="card table-plain-bg">
+                                                    <div class="card-header ">
+                                                        <h4 class="card-title">Create User</h4>
+                                                        <p class="card-category">Enter Below Details Properly(Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <form id="createUserForm" method="post">
+                                                            <div class="row">
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label>First Name <span style="color:red;font-weight:bold">*</span></label>
+                                                                        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+                                                                    </div>
+                                                                </div>                                                
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label>Last Name <span style="color:red;font-weight:bold">*</span></label>
+                                                                        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label>Mobile Number <span style="color:red;font-weight:bold">*</span></label>
+                                                                        <input type="text" id="mobile_no" name="mobile_no" class="form-control" placeholder="Mobile Number" required>
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                            
+                                                            <div class="row">
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label>Email Address <span style="color:red;font-weight:bold">*</span></label>
+                                                                        <input type="email" id="email_id" name="email_id" class="form-control" placeholder="Email Address" required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label>Type <span style="color:red;font-weight:bold">*</span><a href='./faq.php?topic_type=users&sub_topic=create_user' target='_blank'> (For More info on user type Click Here)</a></label>
+                                                                        <select class="form-control" id="type" name="type">
+                                                                            <option value="Select User Type">Select User Type</option>
+                                                                            <option value="NUSER">Normal User</option>
+                                                                            <?php
+                                                                            if($_SESSION['type']==="SADMIN"){
+                                                                            ?>
+                                                                            <option value="FADMIN">Facility Admin</option>                                                                                                                                                        
+                                                                            <?php 
+                                                                            }
+                                                                            ?>
+                                                                            <option value="DUSER">Delivery Person</option>                                                                            
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label>Password <span style="color:red;font-weight:bold">*</span></label>
+                                                                        <input type="text" id="password" name="password" class="form-control" placeholder="Password" required>
+                                                                    </div>
+                                                                </div>
+                                                            </div>   
+                                                            
+                                                            <?php 
+                                                                if($_SESSION['type']==="SADMIN"){
+
+                                                            ?>
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <div class="form-group">                                                                        
+                                                                        <input type="checkbox" id="assignFacility" name="assignFacility"> Assign Branch
+                                                                    </div>
+                                                                </div>                                                                
+                                                            </div>    
+                                                            <!-- Assign Branch Row -->
+                                                            <div class="row" id="assignUserFacRow" style='display:none'>
+                                                                <div class="col-md-12">
+                                                                    <div class="card table-plain-bg">  
+                                                                        <div class="card-header ">
+                                                                            <h5 class="card-title">Assign Branch</h5>
+                                                                        </div>                              
+                                                                        <div class="card-body">                                                                                                                                                                                                         
+                                                                            <div class="row form-group">                                                                            
+                                                                                <div class="col-md-4" id="forward_ret_div_state">
+                                                                                    <div class="form-group">
+                                                                                        <label for="assignUserFacState" >State: <span style="color:red;font-weight:bold">*</span></label>                                                
+                                                                                        <select id="assignUserFacState" name="assignUserFacState" class="form-control">                                                                                            
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </div>                                                                                                                                                               
+                                                                                <div class='col-md-4'>
+                                                                                    <label for='facility_id'>Branch</label>
+                                                                                    <select class='form-control' id='facility_id' name='facility_id' disabled>
+                                                                                    </select>
+                                                                                </div>                                        
+                                                                            </div>
+                                                                        </div>  
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Shipment Status Update card -->
+                                                            </div>    
+                                                            <!-- Assign Branch Row -->      
+                                                            <?php 
+                                                            
+                                                                }
+
+                                                            ?>                                
+                                                            <div class="row">
+                                                                <div class="col-md-3">
+                                                                    <button type="submit" class="form-control btn btn-success">Create</button>
+                                                                </div>
+                                                            </div>                                    
+                                                            <div class="clearfix"></div>   
+                                                        </form>                                 
+                                                    </div>
+                                                </div>   
+                                            
+
+                                    <!-- Create User -->      
+                                    <?php
+                                }
+                                            else{
+                                                echo "You do not have permission to create users";
+                                            }
+                                        }
+
+                                        ?>                                                                                                                                               
+                                    </div>
+                                </div>
+                                <!-- Collapse cards -->
+                            </div>
+                        </div>                                                                                  
+                        <!-- Main Menu -->                                                                    
+                    
                     </div>   
                                                        
                                                                   
@@ -1162,3 +1447,6 @@
 
 
 </html>
+
+
+<?php } }?>

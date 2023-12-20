@@ -171,7 +171,11 @@
   rgba(255, 0, 0, 0.5)   /* Red with 50% transparency */
 );'>
                      
+                     <?php 
 
+include("./includes/loaders.php");
+
+?>
             <div class="content">
                 <div class="container-fluid">
                     <div class="row">

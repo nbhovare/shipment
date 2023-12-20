@@ -5,6 +5,16 @@
         header("location:./login.php");
     }
 
+    require("./includes/db_connect.php");
+    require("./includes/check_permission.php");
+
+    $resForPagePer=checkPermission($_SESSION['user_id'],"reports_php",$connection);
+    if($resForPagePer==="0"){
+        echo "You do not have permission to this page, Please contact your administrator for any query<br/>";       
+        echo "<a href='./index.php'>Click here to goto home page</a>";
+    }
+    else{
+
 ?>
 
 <!-- 
@@ -202,15 +212,18 @@
     </div>
 </div>
 <!--  End Modal -->
+
+<?php 
+
+        include("./includes/loaders.php");
+
+?>
+
+
+
     <div class="wrapper">
 
 
-        <?php
-            include("./includes/sidebar.php");
-        ?>
-        
-
-    <div class="main-panel">
         <?php
 
             include("./includes/navbar.php");
@@ -218,79 +231,29 @@
         ?>
 
             <!-- Main Content -->
-            <div class="content">
+            <div class="content" style='margin-top:10px'>
                 <div class="container-fluid">
                     <div class="row">
+
+                    <?php
+
+                            include("./includes/quick_links.php");
+
+                      ?>
                         <div class="col-md-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h4 class="card-title">Track Shipment</h4>
-                                    <h6>To track your consignment please enter your Shipment ID provided during booking</h6>
+                                    <h4 class="card-title">Upcoming</h4>
+                                    <h6></h6>
                                 </div>
-                                <div class="card-body">
-                                    <form id="trackShipment" method="post">
-                                        <div class="row">                                                                                    
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>Shipment ID</label>
-                                                    <input type="text" id="shipmentID" name="shipmentID" class="form-control" placeholder="Enter your Shipment ID" required>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                <button type="submit" class="btn btn-info btn-fill" style="margin:1px">Track</button>
-                                                <button type="button" class="btn btn-info btn-fill" id="clearBtn" style="margin:1px"disabled>Clear</button>                                                
-                                                <button class="btn btn-fill" id="modifyBtn" style="margin:1px" disabled>Modify</button>
-                                                <button class="btn btn-warning btn-fill" id="deleteBtn" style="margin:1px" disabled>Delete</button>
-                                                </div>
-                                            </div>
-                                        </div>                                        
-                                        <div class="clearfix"></div>
-                                    </form>
+                                <div class="card-body">                                    
+                                        <div class="clearfix"></div>                                    
                                 </div>
                             </div>
                         </div>    
                         
 
-                        <!-- Shipment Details card -->                    
-                        <div class="col-md-12" id="shipment_details_col">
-                            <div class="card table-plain-bg">                                
-                                <div class="card-body">                                    
-                                    <div class="row" id="shipment_details_row">                                                                    
-                                    </div>
-                                    <div class="row" id="sender_details_row">                                    
-                                    </div>
-                                    <div class="row" id="receiver_details_row">                                        
-                                    </div>                                    
-                                </div>  
-                            </div>
-                        </div>
-                        <!-- Shipment Details card Close -->      
-
-                        <!-- Shipment Events Details card -->
-                        <div class="col-md-12" id="shipment_event_card">
-                            <div class="card table-plain-bg">
-                                <div class="card-header ">
-                                    <h4 class="card-title">Shipment Details</h4>
-                                    <p class="card-category">Click on any entry to get more Details</p>
-                                </div>
-                                <div class="card-body table-full-width table-responsive">
-                                    <table class="table table-hover">
-                                    <thead>
-                                        <th>Date (Year/Month/Date)</th>
-                                        <th>Activity</th>
-                                        <th>Location</th>
-                                        <th>From</th>
-                                        <th>To</th>
-                                        <th>Status</th>
-                                    </thead>
-                                    <tbody id="shipment_event_table">
-                                    </tbody>
-                                    </table>
-                                </div>  
-                            </div>
-                        </div>
-                        <!-- Shipment Events Details card Close -->                      
+                                                    
                     </div>
                 </div>
             </div>
@@ -320,3 +283,6 @@
 
 
 </html>
+
+
+<?php }?>
