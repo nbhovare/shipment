@@ -1,6 +1,6 @@
 <?php
 
-    include("../../html/includes/db_connect.php");
+    include("../../shipment/html/includes/db_connect.php");
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {    
         if (isset($_POST['data'])) {
@@ -47,11 +47,11 @@
                     if(mysqli_num_rows($execute_query)>0){                
                         $jsonData_shpiment = mysqli_fetch_all($execute_query, MYSQLI_ASSOC);   
 
-                        $tracking_logQ="INSERT INTO tracking_log (full_name,email_id,shipment_id,enquiry_type) 
+                        /*$tracking_logQ="INSERT INTO tracking_log (full_name,email_id,shipment_id,enquiry_type) 
                         VALUES ('".$formData['full_name']."','".$formData['email_id']."','".$shipmentID."','".$formData['type']."')";
 
                         $tracking_logQ_EQ=mysqli_query($connection,$tracking_logQ);                        
-                                                                                                          
+                          */                                                                                
 
                                         // Close the database connection
                                         mysqli_close($connection);
@@ -67,10 +67,9 @@
                         
                     }
                     else{             
-                        //$res=array(array("error_msg"=>"Shipment ID does not exist"));
-                        $arr=array('error_msg' => 'Shipment ID does not exist');
+                        //$res=array(array("error_msg"=>"Shipment ID does not exist"));                        
                         $jsonData = array(
-                            'error_msg' => $arr
+                            'error_msg' => "Shipment ID does not exist"
                         );
 
                         $jsonData = json_encode($jsonData);
@@ -78,18 +77,24 @@
                     }
                 }
                 else {
-                    $res=array(array("error_msg"=>"Error"));
+                    $res=array(
+                        "error_msg"=>"Error"
+                    );
                     $jsonData = json_encode($res);
                     //echo "Error";
                 }
         }
         else{
-            $res=array(array("error_msg"=>"Invalid Data"));
+            $res=array(
+                "error_msg"=>"Invalid Data"
+            );
             $jsonData = json_encode($res);                                
         }
     }
     else {
-        $res=array(array("error_msg"=>"Invalid Data"));
+        $res=array(
+            "error_msg"=>"Invalid Data"
+        );
         $jsonData = json_encode($res);
         //echo "Enter Shipment ID Properly";
     }

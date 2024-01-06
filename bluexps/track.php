@@ -36,6 +36,24 @@
 <script>
 
 $(document).ready(function() {    
+
+
+
+    
+
+
+    // Global AJAX event handlers
+    $(document).ajaxStart(function() {
+$('#spinner').addClass("show"); // Show the loader when any AJAX request starts
+});
+
+$(document).ajaxStop(function() {
+$('#spinner').removeClass("show"); // Hide the loader when all AJAX requests complete
+});
+
+
+
+
     $("#shipmentTrackingForm").submit(function(e){
         e.preventDefault();
         var formData = $('#shipmentTrackingForm').serializeArray();
@@ -61,36 +79,16 @@ $(document).ready(function() {
                         {                                                        
                             //var responseData = JSON.parse(response);
                             if(response.error_msg){
-                                alert(response[0].error_msg);
+                                alert(response.error_msg);
                             }
                             else{
-
-                                /*<div class=" table-full-width table-responsive">                                    
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <th>Shipment ID</th>
-                                            <th>Date (Year/Month/Date)</th>
-                                            <th>Remarks</th>                                      
-                                            <th>Activity</th>                                                                                    
-                                        </thead>
-                                        <tbody id="queue_process_form_table">
-                                        </tbody>
-                                    </table>                                                                    
-*/
-                                //alert(response.shipment_data[0].current_fac_name);
+                               
                                                                 
                                 $("#shipDetailsSections").empty();
                                 const table=$("<table>").addClass("table-full-width table-responsive table table-hover");
                                 const thead=$("<thead>").append("<th>").append("</th>");
                                 const tbody=$("<tbody>");
-                                table.append(thead).append(tbody);                                
-                                  /*$.each(response.shipment_data, function(index, shipment){        
-                                        const table_row=$("<tr>");
-                                        const table_content=$("<td>").append(shipment);
-                                        table_row.append(table_content);
-                                        table.append(table_row);                                    
-                                        // Perform other operations or access other properties here
-                                    });*/
+                                table.append(thead).append(tbody);                                                                  
                                     var shipment=response.shipment_data[0]["Shipment Status"];                                    
                                     var shipStat="";
                                     if(
@@ -139,8 +137,12 @@ $(document).ready(function() {
 </script>
 
 <body>
+
+    
+
+
     <!-- Spinner Start -->
-    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+    <div id="spinner" class=" bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
         <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status">
             <span class="sr-only">Loading...</span>
         </div>
@@ -189,7 +191,7 @@ $(document).ready(function() {
                                         <label for="name">Shipment ID/Tracking ID</label>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <!--<div class="col-md-6">
                                     <div class="form-floating">
                                         <input type="name" class="form-control" id="full_name" name="full_name" placeholder="Your Full Name" required>
                                         <label for="email">Your Full Name</label>
@@ -200,7 +202,7 @@ $(document).ready(function() {
                                         <input type="email" class="form-control" id="email_id" name="email_id" placeholder="Your Email" required>
                                         <label for="email">Your Email</label>
                                     </div>
-                                </div>                                                            
+                                </div>-->                                                            
                                 <div class="col-12">
                                     <button class="btn btn-primary w-100 py-3" type="submit">Track</button>
                                 </div>

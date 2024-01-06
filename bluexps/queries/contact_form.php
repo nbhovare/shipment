@@ -1,6 +1,6 @@
 <?php
 
-    include("../../html/includes/db_connect.php");    
+    include("../../shipment/html/includes/db_connect.php");    
 
 
     function insertIntoContactForm($data,$connection){        
