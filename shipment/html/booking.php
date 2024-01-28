@@ -70,6 +70,44 @@
 
         $(document).ready(function() {
 
+            <?php 
+                if($_SESSION['type']==="CLIENT"){    
+            ?>
+            const param_id="<?php echo $_SESSION['user_id']; ?>";
+
+            var data_send={
+        "type":"getShipInfo",
+        "user_id":param_id
+    };
+
+        $.ajax({
+        type: "POST",
+        url: './queries/usrProfile.php',
+        data:  {data: data_send},
+        success: function(response)
+        {                   
+
+            
+            var jsonData=JSON.parse(response);
+            if(jsonData && jsonData.error_msg){
+                alert(jsonData.error_msg);                        
+            }
+            else{         
+                               
+                $("#CreditHeading").empty().append("Current Credits Balance = "+jsonData.credits);                            
+            }                                                                                                          
+        },
+        error: function (xhr, status, error) {
+            //return "error";
+            alert("error");
+        },
+        complete: function(){                        
+        }
+    });
+    <?php 
+} ?>
+
+
             const getConForSender=$("#sender_country");   
             getCountry(getConForSender);
 
@@ -129,6 +167,24 @@
                                     
                 }
             });
+
+            <?php 
+                if($_SESSION['type']!="CLIENT"){
+
+                ?>
+            $("#autoFill").change(function(){
+                
+                if($(this).is(':checked')){
+                    $("#senderInformation").hide();
+                }
+                else{
+                    $("#senderInformation").show();
+                }
+            });
+            <?php 
+
+                } ?>
+
 
 
             $("#sender_state").change(function(){
@@ -299,30 +355,18 @@
                 var formData = $('#bookShipment').serializeArray();
                 
                 var error_res="";
-                                                
+                                     
+                <?php 
+
+                    if($_SESSION['type']!="CLIENT"){
+                    ?>
                 if(formData.find(field => field.name === "sender_phone").value.length!=10){
                     error_res=error_res+"<li>Enter Sender Mobile Number Properly</li>";
                 }
-
-                if(formData.find(field => field.name === "shipment_id").value===""){
-                    error_res=error_res+"<li>Enter Shipment Id Properly</li>";
-                }
                 
-                if(formData.find(field => field.name === "Receiver_phone").value.length!=10){
-                    error_res=error_res+"<li>Enter receiver Mobile Number Properly</li>";
-                }
-                
-                if(formData.find(field => field.name === "sender_pincode").value.length!=6){
-                    error_res=error_res+"<li>Enter Sender Pincode Properly</li>";
-                }
-
-                if(formData.find(field => field.name === "Receiver_pincode").value.length!=6){
-                    error_res=error_res+"<li>Enter Receiver Pincode Properly</li>";
-                }
-
-                if(formData.find(field => field.name === "sender_country").value==="Select Country" || 
-                formData.find(field => field.name === "sender_country").value===""){
-                    error_res=error_res+"<li>Select Sender Country Properly</li>";
+                if(formData.find(field => field.name === "sender_city").value==="Select City" || 
+                formData.find(field => field.name === "sender_city").value===""){
+                    error_res=error_res+"<li>Select Sender City Properly</li>";
                 }
 
                 if(formData.find(field => field.name === "sender_state").value==="Select State" || 
@@ -330,11 +374,35 @@
                     error_res=error_res+"<li>Select Sender State Properly</li>";
                 }
 
-
-                if(formData.find(field => field.name === "sender_city").value==="Select City" || 
-                formData.find(field => field.name === "sender_city").value===""){
-                    error_res=error_res+"<li>Select Sender City Properly</li>";
+                if(formData.find(field => field.name === "sender_country").value==="Select Country" || 
+                formData.find(field => field.name === "sender_country").value===""){
+                    error_res=error_res+"<li>Select Sender Country Properly</li>";
                 }
+                if(formData.find(field => field.name === "sender_pincode").value.length!=6){
+                    error_res=error_res+"<li>Enter Sender Pincode Properly</li>";
+                }
+
+
+                if(formData.find(field => field.name === "shipment_id").value===""){
+                    error_res=error_res+"<li>Enter Shipment Id Properly</li>";
+                }
+
+                <?php 
+                    } ?>
+                
+                if(formData.find(field => field.name === "Receiver_phone").value.length!=10){
+                    error_res=error_res+"<li>Enter receiver Mobile Number Properly</li>";
+                }
+                
+                
+
+                if(formData.find(field => field.name === "Receiver_pincode").value.length!=6){
+                    error_res=error_res+"<li>Enter Receiver Pincode Properly</li>";
+                }
+
+               
+
+                
 
                 if(formData.find(field => field.name === "receiver_country").value==="Select Country" || 
                 formData.find(field => field.name === "receiver_country").value===""){
@@ -478,8 +546,14 @@
                                         <p class="card-category">Enter Shipment Details (Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
                                     </div>
                                 <div class="card-body">
+                                    <h6 id="CreditHeading"></h6>
                                     <form id="bookShipment" method="post">
                                         <div class="row">
+                                            <?php 
+
+                                                if($_SESSION['type']!="CLIENT"){
+                                                
+                                            ?>
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="shipment_id">Shipment ID</label>
@@ -487,6 +561,7 @@
                                                     <input type="text" name="shipment_id" id="shipment_id" class="form-control" placeholder="Enter Shipment ID"  required>
                                                 </div>
                                             </div>
+                                            <?php } ?>
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Shipment Type <span style="color:red;font-weight:bold">*</span></label>                                                                                                        
@@ -557,7 +632,17 @@
                         </div>   
                         </div>   
                         
+
+                        <?php 
+                            if($_SESSION['type']!="CLIENT"){
+                            ?>
+
                         <div class="col-md-12">
+                            <input type="checkbox" id="autoFill" checked>
+                            <label for="">Sender Information auto fill from Saved Info</label>
+                        </div>
+
+                        <div class="col-md-12" id="senderInformation" style='display:none'>
                             <div class="card">
                                 <div class=" table-plain-bg">
                                     <div class="card-header ">
@@ -632,6 +717,8 @@
                             </div>   
                         </div>   
                         </div>
+                        <?php 
+                    } ?>
 
                         <div class="col-md-12">
                             <div class="card">

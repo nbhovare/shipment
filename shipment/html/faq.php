@@ -47,10 +47,40 @@
 
 <script>
 
+function getFaqData(data_send){
+
+    // sending ajax request for getting faq data for particular data set specified by user
+
+    $.ajax({
+        type: "POST",
+        url: './queries/faq.php',
+        data:  {data:data_send},
+        success: function(response)
+        {
+
+            var responseData = JSON.parse(response);
+            if(responseData.error_msg){
+                alert(responseData.error_msg);
+            }
+            else{
+                alert(responseData.ret_msg);                
+            }
+        },
+        error: function (xhr, status, error) {
+            console.log("Ajax request failed with status: " + status + " and error: " + error);
+            // You can provide a more user-friendly error message or handle errors as needed.
+        }   
+    }); 
+
+}
+
+
         window.onload = function() {    
             const params = new URLSearchParams(window.location.search);            
             const param_id = params.get('topic_type'); 
-            $('#selectTopic').val(param_id);                        
+            if(param_id!=="" && param_id!==null){
+                $('#selectTopic').val(param_id);                        
+            }
         };
 
 
@@ -63,6 +93,14 @@ $(document).ready(function() {
         }
         else{
             // array
+            switch(selected){
+                case "permission":
+                    var data_send={
+                        "topic":"permission",                        
+                    }
+                    getFaqData(data_send);
+                break;
+            }
         }
     });
 });
@@ -108,7 +146,7 @@ include("./includes/loaders.php");
                                     <p class="card-category">Select any topic from selected list</p>
                                 </div>
                                 <div class="card-body ">   
-                                    <div class="row">
+                                    <div class="row">                                       
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="">Select Topic</label>
@@ -258,24 +296,11 @@ include("./includes/loaders.php");
 <script src="../assets/js/core/bootstrap.min.js" type="text/javascript"></script>
 <!--  Plugin for Switches, full documentation here: http://www.jque.re/plugins/version3/bootstrap.switch/ -->
 <script src="../assets/js/plugins/bootstrap-switch.js"></script>
-<!--  Google Maps Plugin    -->
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script>
-<!--  Chartist Plugin  -->
-<script src="../assets/js/plugins/chartist.min.js"></script>
-<!--  Notifications Plugin    -->
-<script src="../assets/js/plugins/bootstrap-notify.js"></script>
+
 <!-- Control Center for Light Bootstrap Dashboard: scripts for the example pages etc -->
 <script src="../assets/js/light-bootstrap-dashboard.js?v=2.0.0 " type="text/javascript"></script>
 <!-- Light Bootstrap Dashboard DEMO methods, don't include it in your project! -->
 <script src="../assets/js/demo.js"></script>
 
-<script type="text/javascript">
-    $(document).ready(function() {
-        // Javascript method's body can be found in assets/js/demos.js
-        demo.initDashboardPageCharts();
 
-        
-
-    });
-</script>
 </html>

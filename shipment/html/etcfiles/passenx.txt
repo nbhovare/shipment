@@ -22,3 +22,31 @@ hashPassword(password)
         console.error('Error hashing password:', error);
     });
 
+
+    <script>
+                
+
+                $(document).ready(function() {
+    $('#generate-pdf').click(function() {
+        // Create a new jsPDF instance
+        const { jsPDF } = window.jspdf;
+        var doc = new jsPDF();
+
+        // Add content to the PDF
+        doc.text('Hello, this is a sample PDF generated using jsPDF and jQuery!', 10, 10);
+
+        // Save the PDF
+        doc.save('sample.pdf');/*
+
+        const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Hello world!", 100, 100);
+            doc.save("newFile.pdf"); */
+    });
+});
+
+
+            </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+

@@ -45,11 +45,178 @@ include("./includes/check_permission.php");
     <!-- CSS Files -->
     <link href="../assets/css/bootstrap.min.css" rel="stylesheet" />
     <link href="../assets/css/light-bootstrap-dashboard.css?v=2.0.0 " rel="stylesheet" />
+    <script src="../assets/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link href="../assets/css/demo.css" rel="stylesheet" />
 
 
     
+
+
+    <script type="text/javascript">
+
+
+
+function getConData(data_send,elementToAppendDataTo,basedOnValue){
+    // Get Data and send back
+    $.ajax({
+        type: "POST",
+        url: './queries/getCountryData.php',
+        data:  {data: data_send},
+        success: function(response)
+        {                               
+            if(response && response.error_msg){
+                alert(response.error_msg);
+                elementToAppendDataTo.empty();
+            }
+            else if (response && response.data) {                                                                                                    
+                            
+            elementToAppendDataTo.empty();
+            elementToAppendDataTo.append("<option value='Select "+basedOnValue+"'>Select "+basedOnValue+"</option>");
+                $.each(response.data, function(index, getData) {                    
+
+                    $.each(getData, function(index, Values) {                                                                    
+                        const OptionsData=$("<option>").attr("value",Values).text(Values);
+                        elementToAppendDataTo.append(OptionsData);                                     
+                    });
+                        
+                });                    
+            }                                                                                                          
+        },
+        error: function (xhr, status, error) {
+            //return "error";
+            alert("error");
+        }
+    });     
+
+}
+
+
+        $(document).ready(function() {
+
+            $("#refreshShipDetails").click(function(){
+                
+
+
+                var data_send={
+                        "pageId":1,
+                        "filters":0
+                    };
+
+                if($("#filtersCheck").is(":checked")){                    
+                    
+                    if($("#state").val()!="Select State"){
+                        data_send['filters']="1";
+                        data_send['state']=$("#state").val();
+                        
+                        if($("#city").val()!="Select City")
+                            data_send['city']=$("#city").val();
+                    }                                
+
+                    if($("#date").val().trim()!=""){
+                        data_send['filters']="1";
+                        data_send['date']=$("#date").val().trim();
+                    }
+                }
+                
+
+
+                $.ajax({
+                    type: "POST",
+                    url: './queries/shipment.php',
+                    data:  {data: data_send},
+                    success: function(response)
+                    {       
+                        var jsonData=JSON.parse(response);            
+                        if(jsonData && jsonData.error_msg){
+                            alert(jsonData.error_msg);     
+                            $("#shipDetailsCols").empty();                   
+                        }
+                        else{                                                                                                    
+                                                        
+                            const table=$("<table>").addClass("table table-responsive");
+                            const theader=$("<thead>");
+                            const theaderTr=$("<tr>");
+                            const tableHeadersList=['shipment_id', 'shipment_status', 'shipment_type', 'booking_date(YYYY/MM/DD)' ];
+                            for(heads of tableHeadersList){
+                                const theaderTh=$("<th>").append(heads);
+                                theaderTr.append(theaderTh);
+                            }
+                            theader.append(theaderTr);
+                            table.append(theader);
+                            const tbody=$("<tbody>");
+                            $.each(jsonData.shipment_data, function(index, getData) {                         
+                                const tbodyTr=$("<tr>");       
+                                $.each(getData, function(index, getShipData) {    
+                                    
+                                    var toAppendDats=getShipData;
+                                    if(index==="shipment_id"){
+                                        toAppendDats="<a href='trackshipment.php?shipment_id="+getShipData+"' target='_blank'>"+getShipData+"</a>";
+                                    }               
+
+                                    if(index==="shipment_status"){
+                                        if(getShipData==="CREATED" || getShipData==="ARRIVED" || getShipData==="FORWARD" || getShipData==="RETURN"
+                                         || getShipData==="RELEASE_ON_HOLD"
+                                        ){
+                                            toAppendDats="In Transit";
+                                        }
+                                    }
+                                    const tbodyTd=$("<td>").append(toAppendDats);
+                                    
+                                    tbodyTr.append(tbodyTd);
+                                    
+                                });
+                                tbody.append(tbodyTr);
+                            });
+                            table.append(tbody);
+                            $("#shipDetailsCols").empty().append(table);
+                        }                                                                                                          
+                    },
+                    error: function (xhr, status, error) {
+                        //return "error";
+                        alert("error");
+                    },
+                    complete: function(){
+                        //getCData(setTheValue);
+                    }
+                });
+
+            });
+
+            $("#state").change(function(){
+                //
+                const basedOn=$("#state").val();
+                if(basedOn==="Select State"){
+                    $("#city").empty();
+                }
+                else{
+                    var data_send={
+                        "getData":"city",
+                        "basedOn":basedOn
+                    };
+                    getConData(data_send,$("#city"),"City");
+                }
+            });
+
+
+            $("#filtersCheck").change(function(){
+                if($(this).is(":checked")){
+                    var data_send={
+                        "getData":"state",
+                        "basedOn":"INDIA"
+                    };
+                    getConData(data_send,$("#state"),"State");
+                    $("#filtersCol").show();
+                }
+                else{
+                    $("#filtersCol").hide();
+                }
+            });
+            
+
+
+        });
+    </script>
 
 </head>
 
@@ -91,6 +258,62 @@ include("./includes/check_permission.php");
         </div>
     </div>
 </div>
+
+<?php 
+
+    if($_SESSION['type']==="CLIENT"){
+
+?>
+
+
+<div class="col-md-12">
+    <div class="card ">
+        <div class="card-header ">
+            <h4 class="card-title">My Bookings</h4>
+            <p class="card-category">By default shipments are sorted based on booking date (Latest one on top))</p>
+        </div>
+        <div class="card-body ">
+            <div class="row">
+                <div class="col-md-12">
+                    <input type="checkbox" name="filtersCheck" id="filtersCheck">
+                    <label for="filtersCheck"> Apply Filters</label>
+                </div>
+                <div class="col-md-12" id="filtersCol" style='display:none'>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="state">State (Optional)</label>
+                                <select name="state" id="state" class="form-control"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="city">City (Optional)</label>
+                                <select name="city" id="city" class="form-control"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="date">date (Optional)</label>
+                                <input type="date" id="date" name="date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-success" id="refreshShipDetails">
+                        Refresh Details
+                    </button>
+                </div>
+                <div class="col-md-12" id="shipDetailsCols"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php } ?>
+
+
 
 
                        <!-- <div class="col-md-4">
@@ -438,7 +661,7 @@ include("./includes/check_permission.php");
 <script src="../assets/js/light-bootstrap-dashboard.js?v=2.0.0 " type="text/javascript"></script>
 <!-- Light Bootstrap Dashboard DEMO methods, don't include it in your project! -->
 <script src="../assets/js/demo.js"></script>
-
+<!--
 <script type="text/javascript">
     $(document).ready(function() {
         // Javascript method's body can be found in assets/js/demos.js
@@ -447,5 +670,5 @@ include("./includes/check_permission.php");
         
 
     });
-</script>
+</script>-->
 </html>

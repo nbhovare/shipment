@@ -63,6 +63,26 @@
     }
 
 
+    function checkAdminOrNot($user_id,$connection){
+        $checkIfAdminOrNotQ="SELECT * FROM users WHERE user_id='".$user_id."' AND type NOT IN ('SADMIN','FADMIN')";
+        $checkIfAdminOrNotQ_EQ=mysqli_query($connection,$checkIfAdminOrNotQ);
+        if($checkIfAdminOrNotQ_EQ){            
+            if(mysqli_num_rows($checkIfAdminOrNotQ_EQ)>0){
+                // It means user is not under SADMIN or FADMIN, hece updating is allowed based on certain user types
+                return true;
+            }
+            else{
+
+                // It means user is SADMIN or FADMIN hence return false and do not allow further updates to this kind of profiles
+                return false;
+            }
+        }
+        else{
+            return false;
+        }
+    }
+
+
     function updateUserProfile($formData,$user_id,$connection){
         // Update User Profile
         $updateUserProfileQ="UPDATE users SET ";
@@ -79,7 +99,7 @@
             }
         }
 
-        $updateUserProfileQ.=" WHERE user_id='".$user_id."'";
+        $updateUserProfileQ.=" WHERE user_id='".$user_id."'";        
         
         $updateUserProfileQ_EQ=mysqli_query($connection,$updateUserProfileQ);
         if($updateUserProfileQ_EQ){
@@ -101,16 +121,55 @@
                 $jsonData = json_encode($response);    
                 echo $jsonData;
             }
+
+            if($type==="sendUserIDs"){
+                
+                $getUserID=$_POST['data']['user_id'];
+                $response=getUserData("userID",$getUserID,$connection);
+                $jsonData = json_encode($response);    
+                echo $jsonData;
+            }
             
             if($type==="updatePro"){                
                 if(isset($_POST['data']['formData'])){                                    
                     $jsonData=$_POST['data']['formData'];
                     $formData = json_decode($jsonData, true);
-                    if($formData!=null){                                            
-                        $resUpdate=updateUserProfile($formData,$_SESSION['user_id'],$connection);
+                    if($formData!=null){                                                  
+                        if(isset($_POST['data']['user_id'])){
+                            $user_id_from_data=$_POST['data']['user_id'];
+                            // check if user id thats received in data 
+                            // is it SADMIN || FADMIN do not allow to update
+
+                            $checkIfAdminOrNot=checkAdminOrNot($user_id_from_data,$connection);
+                            if($checkIfAdminOrNot){
+                                $resUpdate=updateUserProfile($formData,$user_id_from_data,$connection);                            
+                            }
+                            else{
+                                $ret_msg="You cannot update details for this User";
+                                $return_data=array(
+                                    "ret_msg" => $ret_msg
+                                );
+                                $jsonData = json_encode($return_data);    
+                                echo $jsonData;                                
+                            }
+                            
+                        }
+                        else{
+                            
+                            $resUpdate=updateUserProfile($formData,$_SESSION['user_id'],$connection);
+                        }
+                        
                         
                         if($resUpdate===1){
                             $ret_msg="Details Updated Successfully";
+                            $return_data=array(
+                                "ret_msg" => $ret_msg
+                            );
+                            $jsonData = json_encode($return_data);    
+                            echo $jsonData;
+                        }
+                        else{
+                            $ret_msg="Error Updating Details";
                             $return_data=array(
                                 "ret_msg" => $ret_msg
                             );

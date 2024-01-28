@@ -19,12 +19,16 @@
                             </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                                 <a class="dropdown-item" href="booking.php">Book Shipment</a>
-                                <a class="dropdown-item" href="trackshipment.php">Track/Modify Shipment</a>
-                                <a class="dropdown-item" href="reports.php">Reports</a>
-                                <div class="divider"></div>
-                                <a class="dropdown-item" href="#">More Options</a>
+                                <a class="dropdown-item" href="trackshipment.php">Track/Modify Shipment</a>                                
+                                <!--<div class="divider"></div>
+                                <a class="dropdown-item" href="#">More Options</a>-->
                             </div>
                         </li>   
+
+                        <?php 
+                            if($_SESSION['type']!="CLIENT"){
+                            ?>
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="facility.php" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="no-icon">Branch</span>
@@ -39,6 +43,7 @@
                                 <span class="no-icon">Users</span>
                             </a>
                         </li>
+                        <?php } ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="myaccount.php" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="no-icon">Your Account</span>

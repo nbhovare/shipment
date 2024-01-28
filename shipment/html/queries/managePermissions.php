@@ -27,7 +27,10 @@
                     $stmt = $conn->prepare($sql);
                     $stmt->bind_param('ssss', $user_id, $permission, $user_id, $permission);
                     $stmt->execute();
+
+                    
                 }            
+                
                 
                 $ret_msg="Permissions inserted successfully!";
                 $return_data=array(

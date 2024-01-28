@@ -9,14 +9,14 @@
     require("./includes/db_connect.php");
     require("./includes/check_permission.php");
 
-    $resForPagePer=checkPermission($_SESSION['user_id'],"users_php",$connection);
+    $resForPagePer=checkPermission($_SESSION['user_id'],"bucket_php",$connection);
     if($resForPagePer==="0"){
         echo "You do not have permission to this page, Please contact your administrator for any query<br/>";       
         echo "<a href='./index.php'>Click here to goto home page</a>";
     }
     else{
 
-        $retPerData=getUserPermissionForPage($_SESSION['user_id'],"users_php",$connection);
+        $retPerData=getUserPermissionForPage($_SESSION['user_id'],"bucket_php",$connection);
         if($retPerData!="-1" && $retPerData!="0"){
         
 
@@ -47,7 +47,7 @@
     <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
     <link rel="icon" type="image/png" href="../assets/img/favicon.ico">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <title>Users</title>
+    <title>Bucket</title>
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
     <!--     Fonts and icons     -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
@@ -96,7 +96,7 @@
             
         <?php 
         
-            if(in_array("users_php_VIEW_USERS",$retPerData)){
+            if(in_array("bucket_php_VIEW_BUCKET",$retPerData)){
 
         ?>
 
@@ -230,12 +230,12 @@ function getCurrentPer(){
         let booking_phpArr=[
   "booking_php_BOOK_SHIP"
 ];
-        let users_phpArr=[
-  "users_php_CREATE_USER",
-  "users_php_MANAGE_PERMISSIONS",
-  "users_php_VIEW_USERS",
-  "users_php_MANAGE_FACILITY",
-  "users_php_REMOVE_USER_FROM_FAC"
+        let client_phpArr=[
+  "client_php_CREATE_CLIENT",
+  "client_php_MANAGE_PERMISSIONS",
+  "client_php_VIEW_CLIENT",
+  "client_php_MANAGE_FACILITY",
+  "client_php_REMOVE_USER_FROM_FAC"
 ];
         let facility_phpArr=[
   "facility_php_CREATE_FACILITY",
@@ -250,21 +250,6 @@ let reports_phpArr=[
   "reports_php_GET_USER_DATA"
 ];
 
-let client_phpArr=[
-    "client_php_CREATE_CLIENT",
-    "client_php_VIEW_CLIENT",
-    "client_php_REMOVE_CLIENT"
-];
-
-let bucket_phpArr=[
-    "bucket_php_CREATE_BUCKET",
-    "bucket_php_VIEW_BUCKET",
-    "bucket_php_DELETE_BUCKET",
-    "bucket_php_REARRANGE_BUCKET",
-    "bucket_php_UPDATE_BUCKET_STATUS"
-];
-
-
                             let opts = null;
 
                             switch(perForPage){
@@ -278,19 +263,11 @@ let bucket_phpArr=[
                                 case "facility_php":
                                     opts=facility_phpArr;
                                 break;
-                                case "users_php":
-                                    opts=users_phpArr;
-                                break;
-                                case "reports_php":
-                                    opts=reports_phpArr;
-                                break;
-
                                 case "client_php":
                                     opts=client_phpArr;
                                 break;
-
-                                case "bucket_php":
-                                    opts=bucket_phpArr;
+                                case "reports_php":
+                                    opts=reports_phpArr;
                                 break;
 
                             }
@@ -463,6 +440,79 @@ function getData(fieldNames){
 }
 
 
+function bucketClicked(element){    
+    $("#bucketID").val($(element).attr("id"));
+    trackBucketDetails($(element).attr("id"));
+    openCity(event, 'search_bucket_collapse_body');
+}
+
+
+
+
+function trackBucketDetails(bucketID){
+    // Track Bucket Details
+    
+    var error_res="";
+    if(bucketID==="" || bucketID===null){
+        error_res="<li>Enter Bucket ID Properly";
+    }
+
+    if(error_res.length!=0){                    
+        $("#modal_message").empty();
+        $("#modal_message").append("<ul>"+error_res+"</ul>");
+        $('#error_modal').modal('show');
+    }
+    else{
+        var data_send={
+            "type":"searchBucket",
+            "searchBy":"bucket_id",
+            "bucket_id":bucketID
+        }
+        $.ajax({
+            type: "POST",
+            url: './queries/bucket.php',
+            data:  {data: data_send},
+            success: function(response)
+            {                                                        
+                //var responseData = JSON.parse(response);
+                if(response.error_msg){                                
+                    alert(response.error_msg);
+                }
+                else{                               
+                    $("#bucket_operation_col").show();
+                    $("#bucket_details_col").show();
+                    $("#bucket_details_contents_col").show();
+                    
+                    
+                    const table=$("<table>").addClass("table-responsive");
+                    //const thead=$("<thead>");
+                    const tbody=$("<tbody>");
+                    const bucketHeaders=["bucket_id","bucket_name","create_date","created_by","dest_id","dest_name","facility_id","facility_name","status","weight",'additional_information'];                    
+
+                    $.each(response.bucket_data,function(index,getBucketData){                                                
+                        
+                        bucketHeaders.forEach(header=>{
+                            const row=$("<tr>");
+                            const col0=$("<th>").text(header);
+                            const col=$("<th>").text(getBucketData[header]);
+                            row.append(col0).append(col);
+                            tbody.append(row); 
+                        });
+
+                    });
+                    table.append(tbody)
+                    $("#bucket_details_body").empty().append(table);
+
+                }
+            },
+            error: function (xhr, status, error) {
+                console.log("Ajax request failed with status: " + status + " and error: " + error);
+                // You can provide a more user-friendly error message or handle errors as needed.
+            }
+        });  
+    }
+
+}
 
         function actionRemoveBtnClick(){
             var error_msg="";
@@ -476,7 +526,7 @@ function getData(fieldNames){
             if(error_msg!=0){
                 $("#actions_modal_title, #actions_modal_body").empty();                
                 $("#actions_modal").modal('show');
-                $("#actions_modal_title").append('Actions Tab -Remove Users from facility');                
+                $("#actions_modal_title").append('Actions Tab -Remove Clients/Customers from facility');                
                 $("#actions_modal_title").append('<hr>');                
                 $("#actions_modal_body").append(error_msg);                            
             }
@@ -495,9 +545,9 @@ function getData(fieldNames){
                             $("#actions_modal_title").append('Actions Tab -Remove Users from facility');                
                             $("#actions_modal_title").append('<hr>');
                             const data_append=$("<p>").append(
-                                "Are you sure you want to remove selected users from facility"+
-                                "<br/>Total users selected = "+checkboxChecked.counter+
-                                "<br/>Also the permissions assigned to these users will be removed"
+                                "Are you sure you want to remove selected clients/Customers from facility"+
+                                "<br/>Total clients/Customers selected = "+checkboxChecked.counter+
+                                "<br/>Also the permissions assigned to these clients/Customers will be removed"
                             );
                             $("#actions_modal_body").append(data_append);
                             $("#actions_modal").modal('show');                            
@@ -508,61 +558,211 @@ function getData(fieldNames){
             }                        
         }
 
-        function actionEditBtnClick(){
-            var error_msg="";
-            if(checkboxChecked.counter===0 || checkboxChecked.counter===undefined){   
-                error_msg="No Users Selected!!";
+
+
+
+        function updateShipmentDetailsInBucket(data_send){
+            $.ajax({
+                type: "POST",
+                url: './queries/bucket.php',
+                data:  {data: data_send},
+                success: function(response)
+                {                                                        
+                    //var responseData = JSON.parse(response);
+                    if(response.error_msg){                                
+                        alert(response.error_msg);
+                    }
+                    else{                                
+                        alert(response.ret_msg);                        
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log("Ajax request failed with status: " + status + " and error: " + error);
+                    // You can provide a more user-friendly error message or handle errors as needed.
+                }
+            });    
+        }
+        
+
+        function verifyShipmentButton(){
+            // Verify
+            var error_res="";
+            const shipmentIdToVerify=$("#shipmentIdToVerify").val();            
+            if(shipmentIdToVerify===""){
+                error_res="<li>Enter Shipment ID Properly";
             }
-            else if(checkboxChecked.counter>1){
-                error_msg="Only One Users at a time should be Selected for this operation!!";
-            }
-            
-            if(error_msg!=0){
-                $("#actions_modal_title, #actions_modal_body").empty();                
-                $("#actions_modal").modal('show');
-                $("#actions_modal_title").append('Actions Tab - Edit/Remove Permission');                
-                $("#actions_modal_title").append('<hr>');                
-                $("#actions_modal_body").append(error_msg);                            
+
+            if(error_res.length!=0){                    
+                $("#modal_message").empty();
+                $("#modal_message").append("<ul>"+error_res+"</ul>");
+                $('#error_modal').modal('show');
             }
             else{
-                                                   
-                const linkToFaqDocx=$("<a>").attr({
-                                "href":"./faq.php?topic_type=permission",
-                                "target":"_blank"
-                            }).text("Know more about permissions");                            
+                var optionExists = $("#bucketContents option:contains('"+shipmentIdToVerify+"')").length > 0;
 
-                const label=$("<label>").text('Permission For');
-                const row=$('<div>').addClass('row');
-                const col=$('<div>').addClass('col-md-12');  
-                const selectInputForPerType=$("<select>").addClass("form-control").attr({
-                    "id":"selectInputForPerType",
-                    "onchange":"getCurrentPer()"                    
-                });
-
-                selectInputForPerType.empty();
-                const arrForSelPerType=["Select Permission For","Book Shipment Page","Track Shipment Page","Users Page","Facility Page","Reports Page","Clients/Customers Page", "Bucket Page"];
-                const arrForSelPerTypeID=["Select Permission For","booking_php","trackshipment_php","users_php","facility_php","reports_php","client_php","bucket_php"];                
-                for(let incPer=0;incPer<arrForSelPerType.length;incPer++){
-                    const optionForPerType=$("<option>").attr("value",arrForSelPerTypeID[incPer]).text(arrForSelPerType[incPer]);
-                    selectInputForPerType.append(optionForPerType);                   
-                }                
-
-                col.append(label);
-                col.append(selectInputForPerType);
-                row.append(col);                
-                
-                $("#actions_modal_title, #actions_modal_body").empty();                
-                    $("#actions_modal_title").append('Actions Tab - Edit/Remove Permission'); 
-                    $("#actions_modal_body").append(linkToFaqDocx);               
-                    $("#actions_modal_title").append('<hr>');
-                    $("#actions_modal_body").append(row);
-                    $("#actions_modal").modal('show');
-                    $("#userRemoveBtn").hide();
-                    $("#perSaveBtn").show();
-             
+                if (!optionExists){
+                                    
+                    var data_send={
+                        "type":"verifyShipmentID",
+                        "shipmentID":shipmentIdToVerify
+                    };
+                    $.ajax({
+                        type: "POST",
+                        url: './queries/bucket.php',
+                        data:  {data: data_send},
+                        success: function(response)
+                        {                                                        
+                            //var responseData = JSON.parse(response);
+                            if(response.error_msg){                                
+                                alert(response.error_msg);
+                            }
+                            else{                                
+                                if(response.ret_msg==="add_to_bucket"){
+                                    const optionForAdd=$("<option>").attr("value",shipmentIdToVerify).text(shipmentIdToVerify);                                                                                                
+                                    $("#bucketContents").append(optionForAdd);
+                                }
+                                else{
+                                    alert("Error");                        
+                                }
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Ajax request failed with status: " + status + " and error: " + error);
+                            // You can provide a more user-friendly error message or handle errors as needed.
+                        }
+                    }); 
+                }     
+                else{
+                    alert("Shipment ID already verified and added to Bucket List");
+                }  
             }
+            
+        }
+
+
+        function removeSelectedFroLists(){
+            // Remove Selected From Lists
+
+        
+            $("#bucketContents option:selected").remove();
 
         }
+
+        function getShipmentDetailsForBucket(){
+            // Get Shipment Details 
+
+            const bucketID=$("#bucketID").val();
+            var error_res="";
+            if(bucketID===""){
+                error_res="<li>Enter Bucket ID Properly</li>";
+            }
+
+              
+            if(error_res.length!=0){                    
+                $("#modal_message").empty();
+                $("#modal_message").append("<ul>"+error_res+"</ul>");
+                $('#error_modal').modal('show');
+            }
+            else{
+                var data_send={
+                    "type":"getBucketCon",
+                    "bucketID": bucketID
+                }
+
+                $.ajax({
+                        type: "POST",
+                        url: './queries/bucket.php',
+                        data:  {data: data_send},
+                        success: function(response)
+                        {                                                        
+                            //var responseData = JSON.parse(response);
+                            if(response.error_msg){                                
+                                alert(response.error_msg);
+                            }
+                            else{                     
+                                $("#bucket_details_contents_col").show();                                             
+                                $("#bucket_details_contents_body").empty();
+
+
+                                const tableForCon=$("<table>").addClass("table-responsive");
+                                const tableForConThead=$("<thead>");
+                                const headersForCon=["shipment_id","updated_by","facility_id","date","facility_name","first_name"];   
+                                const trForCon=$("<tr>");
+                                headersForCon.forEach(headers=>{
+                                    const thForCon=$("<th>").append(headers);
+                                    trForCon.append(thForCon);                                                                       
+                                });                           
+                                tableForConThead.append(trForCon);
+                                const tableForConTbody=$("<tbody>");             
+                                $.each(response.bucket_con,function(index,getBuckConDatas){
+                                    //$.each(getBuckConData,function(index,getBuckConDatas){
+                                        const trForCon1=$("<tr>");                                    
+                                        headersForCon.forEach(headers=>{                                            
+                                            const tdForCon=$("<td>").append(getBuckConDatas[headers]);
+                                            trForCon1.append(tdForCon);               
+                                        });                                                                 
+                                        tableForConTbody.append(trForCon1);
+                                    //});                                    
+                                });
+
+                                tableForCon.append(tableForConThead).append(tableForConTbody);
+                                $("#bucket_details_contents_body").append(tableForCon);
+
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Ajax request failed with status: " + status + " and error: " + error);
+                            // You can provide a more user-friendly error message or handle errors as needed.
+                        }
+                    });    
+
+            }
+                        
+        }
+
+
+        function addSelectedToListsBucket(){
+            // Add to Bucket
+
+            const optionValues = $('#bucketContents').find('option').map(function() {
+                return $(this).val();
+            }).get();
+
+            if(optionValues.length===0){
+                alert("Select Shipment ID to add");
+            }
+            else{
+                var data_send={
+                    "type":"addShipmentToBucket",
+                    "shipToAdd":optionValues,
+                    "bucketID": $("#bucketID").val()
+                }                
+
+                $.ajax({
+                        type: "POST",
+                        url: './queries/bucket.php',
+                        data:  {data: data_send},
+                        success: function(response)
+                        {                                                        
+                            //var responseData = JSON.parse(response);
+                            if(response.error_msg){                                
+                                alert(response.error_msg);
+                            }
+                            else{                                
+                                alert(response.ret_msg);                            
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Ajax request failed with status: " + status + " and error: " + error);
+                            // You can provide a more user-friendly error message or handle errors as needed.
+                        }
+                    });    
+
+            }
+
+
+        }
+
 
 
         <?php } ?>
@@ -571,177 +771,24 @@ function getData(fieldNames){
         $(document).ready(function() {
             
 
-            <?php 
-                if(in_array("users_php_CREATE_USER",$retPerData)){
+            <?php             
+            if(in_array("bucket_php_CREATE_BUCKET",$retPerData)){                    
+?>
 
-                    if($_SESSION['type']==="SADMIN"){
-            ?>
-
-            $("#assignFacility").change(function(){
-                
-
-                if ($(this).is(':checked')) {
-
-                    getCountry($("#assignUserFacCountry"));
-                    $("#assignUserFacRow").show();
-                /*    
-                    // Adding other options to state & country
-                    const states = [
-                                            "Select State", "Andhra Pradesh", "Andaman and Nicobar Islands", "Arunachal Pradesh", "Assam", "Bihar",
-    "Chandigarh", "Chhattisgarh", "Dadar and Nagar Haveli", "Daman and Diu", "Delhi", "Lakshadweep",
-    "Puducherry", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand",
-    "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
-    "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
-    "Uttarakhand", "West Bengal"
-  ];
-
-  const selectApp = $('#assignUserFacState');  
-  
-  $.each(states, function(index, state) {    
-    const option = $('<option>').attr("value",state).text(state);
-    selectApp.append(option);
-  });*/
-                } else {
-                    $("#assignUserFacRow").hide();      
-                    $('#assignUserFacState').empty();
-                }
-            });
-
-
-            $("#assignUserFacState").click(function(){
-                var error_res="";
-                var state=$("#assignUserFacState").val();
-                if(state==="Select State"){
-                    error_res="<li>Select State Properly</li>";
-                }
-   
-
-
-                if(error_res.length!=0){                    
-                    $("#modal_message").empty();
-                    $("#modal_message").append("<ul>"+error_res+"</ul>");
-                    $('#error_modal').modal('show');
-                }
-                else{                    
-
-                    var data_send={
-                        getData:"city",
-                        basedOn:state
-                    };
-
-                    
-
-                    getConData(data_send,$("#assignUserFacCity"),"City");
-
-                }
-                
-
-                });
-
-            $("#assignUserFacCountry").click(function(){
-
-
-
-                var error_res="";
-
-                var country=$("#assignUserFacCountry").val();                
-                if(country==="Select Country"){
-                    error_res="<li>Select Country Properly";
-                }                                           
-                
-                if(error_res.length!=0){                    
-                    $("#modal_message").empty();
-                    $("#modal_message").append("<ul>"+error_res+"</ul>");
-                    $('#error_modal').modal('show');
-                }
-                else{
-                    var data_send={
-                        "getData":"state",
-                        "basedOn":country
-                    };
-                    getConData(data_send,$("#assignUserFacState"),"State");
-                }
-            });
-            
-
-
-
-            $("#assignUserFacCity").change(function(){                
-                var error_res="";
-                var city=$("#assignUserFacCity").val();
-                var state=$("#assignUserFacState").val();
-                var country=$("#assignUserFacCountry").val();
-                if(state==="Select State"){
-                    error_res="<li>Select State Properly </li>";
-                }
-                if(country==="Select Country"){
-                    error_res="<li>Select Country Properly</li>";
-                }
-                if(city==="Select City"){
-                    error_res="<li>Select City Properly</li>";
-                }
-
-                if(error_res.length!=0){                    
-                    $("#modal_message").empty();
-                    $("#modal_message").append("<ul>"+error_res+"</ul>");
-                    $('#error_modal').modal('show');
-                }
-                else{
-                    // List Facilities in Select                                
-                    $.ajax({
-                        type: "POST",
-                        url: './queries/getFacilityList.php',
-                        data:  {facilityCountry:country,facilityState:state,facilityCity:city},
-                        success: function(response)
-                        {
-                            if(response.error_msg){
-                                $("#createUserForm #facility_id").empty();
-                                $("#createUserForm #facility_id").prop("disabled",true);
-                                alert(response.error_msg.error_msg);                                    
-                            }
-                            else{    
-                                $("#createUserForm #facility_id").empty();
-                                $("#createUserForm #facility_id").prop("disabled",false);
-                                $("#createUserForm #facility_id").append("\
-                                    <option value='Select Branch'>Select Branch</option>");
-
-                                $.each(response.facility_data, function(index, getData) {
-                                    
-                                    $("#createUserForm #facility_id").append("\
-                                        <option value="+getData.facility_id+">"+getData.facility_name+"</option>");
-                                    });
-                                    
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.log("Ajax request failed with status: " + status + " and error: " + error);
-                            // You can provide a more user-friendly error message or handle errors as needed.
-                        }   
-                    });         
-                }             
-            });
-
-
-            <?php 
-                }
-
-            ?>
-
-            $('#createUserForm').submit(function(e) {
+            $('#createBucketForm').submit(function(e) {                
                 e.preventDefault();
-                var formData = $('#createUserForm').serializeArray();
+                var formData = $('#createBucketForm').serializeArray();
                 
                 var error_res="";                
 
-                if(formData.find(field => field.name === "mobile_no").value.length!=10){
-                    error_res=error_res+"<li>Enter Mobile Number Properly</li>";
+                if(formData.find(field => field.name === "bucket_id").value===""){
+                    error_res=error_res+"<li>Enter Bucket ID Properly</li>";
                 }
-                
-                if(formData.find(field => field.name === "type").value==="Select User Type"){
-                    error_res=error_res+"<li>Incorrect Value for User Type</li>";
-                }
-                                
-                if ($("#assignFacility").is(':checked')) {
+                if(formData.find(field => field.name === "bucket_name").value===""){
+                    error_res=error_res+"<li>Enter Bucket Name Properly</li>";
+                }                
+                                                                
+                /*if ($("#assignFacility").is(':checked')) {
                     if(formData.find(field => field.name === "assignUserFacState").value==="Select State"){
                         error_res=error_res+"<li>Select State Properly</li>";
                     }
@@ -756,8 +803,7 @@ function getData(fieldNames){
                             error_res=error_res+"<li>Select Branch Properly</li>";
                         }
                     }
-                }
-                
+                }*/                
                 if(error_res.length!=0){                    
                     $("#modal_message").empty();
                     $("#modal_message").append("<ul>"+error_res+"</ul>");
@@ -767,79 +813,45 @@ function getData(fieldNames){
                 
                 
                     // Serialize the form data using jQuery                    
-
-                    var formDataObject = {};
-                    let hashedPass="";
-
-                    $.each(formData, function(index, field) {
-                        if(field!="password"){
-                            formDataObject[field.name] = field.value;
-                        }
-                    });
                     
-                        async function hashPassword(password) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hash = await crypto.subtle.digest('SHA-256', data);    
-    return hash;
-}
+                    
+                    var formDataObject = {};
+                    $.each(formData, function(index, field) {
+                        formDataObject[field.name] = field.value;
+                    });
 
-
-async function storeHashedPassword() {
-    try {
-        const hashedPassword = await hashPassword($("#createUserForm #password"));
-        // Convert the hashed password to a hexadecimal string
-        const hashedPasswordHex = Array.from(new Uint8Array(hashedPassword))
-            .map(byte => byte.toString(16).padStart(2, '0'))
-            .join('');
-        //hashedPass = hashedPasswordHex;        
-        formDataObject["password"] = hashedPasswordHex;
-    } catch (error) {
-        console.error('Error hashing password:', error);
-    }
-}
-
-// Call the function to store the hashed password
-storeHashedPassword();
-
-/*
-hashPassword($("#createUserForm #password"))
-    .then(hashedPassword => {
-        // Convert the hashed password to a hexadecimal string
-        const hashedPasswordHex = Array.from(new Uint8Array(hashedPassword))
-            .map(byte => byte.toString(16).padStart(2, '0'))
-            .join('');                                
-    })
-    .catch(error => {
-        console.error('Error hashing password:', error);    
-    });                    
-                */ 
-
-    //console.log(hashedPass);
-      //              formDataObject["password"] = hashedPass;
                     // Convert the JSON object to a JSON string
-                    var formDataJSON = JSON.stringify(formDataObject);                    
-                                                     
+                    var formDataJSON = JSON.stringify(formDataObject);   
+
+                    const data_send={
+                        "type":"createBucket",
+                        "formData":formDataJSON
+                    };
+                    
                     $.ajax({
                         type: "POST",
-                        url: './queries/createUser.php',
-                        data:  {data: formDataJSON},
+                        url: './queries/bucket.php',
+                        data:  {data: data_send},
                         success: function(response)
                         {                                                        
-                            var responseData = JSON.parse(response);
-                            if(responseData[0].error_msg){                                
-                                alert(responseData[0].error_msg);
+                            //var responseData = JSON.parse(response);
+                            if(response.error_msg){                                
+                                alert(response.error_msg);
                             }
-                            else{
-                                document.getElementById('createUserForm').reset();
-                                alert(responseData[0].ret_msg);
+                            else{                                
+                                alert(response.ret_msg);
+                                //
+                                $('#createBucketForm').trigger("reset");
                             }
                         },
                         error: function (xhr, status, error) {
                             console.log("Ajax request failed with status: " + status + " and error: " + error);
                             // You can provide a more user-friendly error message or handle errors as needed.
                         }
-                    });
+                    });            
+
+
+                  
                 }
             });
 
@@ -847,11 +859,27 @@ hashPassword($("#createUserForm #password"))
 
             <?php 
 
-if(in_array("users_php_VIEW_USERS",$retPerData)){
+if(in_array("bucket_php_VIEW_BUCKET",$retPerData)){
 
 ?>   
             
             
+            $("#bucketTrackForm").submit(function(e){
+                e.preventDefault();
+                trackBucketDetails($("#bucketID").val());
+            });
+
+            $("#clearBtn").click(function(){
+                // Clear Everything
+
+                $("#bucketTrackForm").trigger("reset");
+                $("#bucket_details_col").hide();
+                $("#bucket_details_body").empty();
+                $("#bucket_operation_col").hide();
+                $("#bucket_details_contents_col").hide();
+
+            })
+
             $("#perSaveBtn").click(function(){
                 // per
                 var perTypePage=$("#selectInputForPerType").val();
@@ -876,8 +904,6 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
         return $(this).val();
     }).get();
 
-
-    
 
                 data_send={
                     "type":"update",
@@ -910,7 +936,97 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                 }
 
 
-            })
+            });
+
+            $("#addShipmentToBucket").click(function(){
+                /*var data_send={
+                    "type":"addShipmentToBucket",
+                    "shipmentIds":shipmentIds,
+                    "bucketID":bucketID
+                };*/
+                
+                $("#actions_modal_title").empty().append("Add Shipment To Bucket");
+                
+                const colForInputShipId=$("<div>").addClass("col-md-12").attr("id","colForShipIDAdd");
+                /*const labelForSearchByShipID=$("<label>").text("Shipment ID");
+                const searchBYShipID=$("<input>").attr({
+                    "type":"text",
+                    "id":"addShipmentID",
+                    "placeholder":"Enter Shipment ID"
+                }).addClass("form-control");*/
+
+
+
+
+// Create the input group dynamically
+var inputGroup = $('<div>', { class: 'input-group mb-3' });
+
+// Create the input element
+var input = $('<input>', {
+    type: 'text',
+    class: 'form-control',
+    placeholder: "Shipment ID",
+    id: "shipmentIdToVerify",
+    'aria-label': "Enter Shipment ID",
+    'aria-describedby': 'basic-addon2'
+}).prop('required',true);
+
+// Create the input group append div
+var inputGroupAppend = $('<div>', { class: 'input-group-append' });
+
+// Create the button element
+var button = $('<button>', {
+    class: 'btn btn-outline-secondary',
+    type: 'button',
+    text: 'Verify',
+    onclick: 'verifyShipmentButton()'
+});
+
+// Append input and button to their respective parents
+inputGroupAppend.append(button);
+inputGroup.append(input, inputGroupAppend);
+
+
+
+
+
+                
+
+                /////
+
+                //colForInputShipId.append(labelForSearchByShipID).append(searchBYShipID).append(inputGroup);
+                colForInputShipId.append(inputGroup);
+
+
+                const labelForShipAdd=$("<label>").text('Bucket Contents To be Added');
+                const rowForShipAdd=$('<div>').addClass('row');
+                const colForShipAdd=$('<div>').addClass('col-md-12');         
+                                                                    
+                //const select=$('<select>').addClass('multi-select form-control').attr('id','curPer');
+                const selectForShipAdd=$('<select>').addClass('select_size form-control').attr({
+                    'id': 'bucketContents',
+                    'multiple':'multiple',
+                    'style': 'height:200px'
+                    });                
+
+                colForShipAdd.append(labelForShipAdd).append(selectForShipAdd)
+                rowForShipAdd.append(colForShipAdd);
+
+                const colForButtons=$("<div>").addClass("col-md-12");
+                const rowForButtons=$("<div>").addClass("row");
+                const buttonForRemToList=$("<button>").attr({
+                    onclick:"removeSelectedFroLists()"
+                }).text("Remove Selected From Lists");
+
+                colForButtons.append(buttonForRemToList)
+                rowForButtons.append(colForButtons);
+
+                $("#actions_modal_body").empty().append(colForInputShipId).append(colForShipAdd).append(rowForButtons);
+                $("#actions_modal").modal("show");
+
+                
+            });
+
 
             $("#userRemoveBtn").click(function(){
                 var error_res="";
@@ -932,7 +1048,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
 
                     $.ajax({
                         type: "POST",
-                        url: './queries/removeUserFromFac.php',
+                        url: './queries/removeClientFromFac.php',
                         data:  {data: data_send},
                         success: function(response)
                         {                                                        
@@ -965,19 +1081,19 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
 
                     case "search_by":
                         $("#modal_message").empty();
-                        $("#modal_message").append("<ul>Properly specify how you want to search user</ul>");
+                        $("#modal_message").append("<ul>Properly specify how you want to search bucket</ul>");
                         $('#error_modal').modal('show');                        
                         $("#searchUserBtn").prop("disabled",true);
                     break;
 
-                    case "email_id":
+                    case "bucket_id":
                         const colForEmail=$("<div>").addClass("col-md-4");
                         const inputDiv=$("<div>").addClass("form-group");
-                        const inputEmailSearchLabel=$("<label>").text("User-ID/Email-ID (Required *)");
+                        const inputEmailSearchLabel=$("<label>").text("Bucket-ID (Required *)");
                         const inputEmailSearch=$("<input>").attr({
-                            "type":"email",
-                            "id":"search_email_id",
-                            "placeholder":"Enter Email ID"
+                            "type":"bucket_id",
+                            "id":"search_bucket_id",
+                            "placeholder":"Enter Bucket ID"
                         }).prop("required",true).addClass("form-control");
                         inputDiv.append(inputEmailSearchLabel);
                         inputDiv.append(inputEmailSearch);
@@ -985,72 +1101,10 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                         $("#searchUserFilterRow").append(colForEmail);
                         $("#searchUserBtn").prop("disabled",false);
                     break;
-
-                    case "facility":
-                        
-                        // Create Search Form
-                                                
-                        const selectSearchLabel=$("<label>").text("Branch State (Required *)");
-                        const selectSearch=$("<select>").attr({                            
-                            "id":"search_fac_state",
-                            "onchange":"getData('state')"
-                        }).addClass("form-control");
-
-                        const selectSearchCountryLabel=$("<label>").text("Branch Country (Required *)");
-                        const selectSearchCountry=$("<select>").attr({                            
-                            "id":"search_fac_country",
-                            "onchange":"getData('country')"
-                        }).addClass("form-control");
-
-
-                        getCountry(selectSearchCountry);
-
-                        const selectSearchCityLabel=$("<label>").text("Branch City (Required *)");
-                        const selectSearchCity=$("<select>").attr({                            
-                            "id":"search_fac_city",
-                            "onchange":"selectSearchChange()"
-                        }).addClass("form-control");
-                        
-                        const selectSearchLabelFac=$("<label>").text("Branch (Required *)");
-                        const selectSearchFac=$("<select>").attr({                            
-                            "id":"search_fac_state_facility_id",                            
-                        }).addClass("form-control").prop("disabled",true);
-
-                        const headersLabel = [selectSearchCountryLabel,selectSearchLabel, selectSearchCityLabel, selectSearchLabelFac];
-                        const headers = [selectSearchCountry, selectSearch, selectSearchCity, selectSearchFac];
-
-                        for(let i=0;i<headersLabel.length;i++){
-                            var colForSearch=$("<div>").addClass("col-md-3");
-                            var colForSearchDiv=$("<div>").addClass("form-group");
-                            colForSearchDiv.append(headersLabel[i]).append(headers[i]);                            
-                            colForSearch.append(colForSearchDiv);
-                            $("#searchUserFilterRow").append(colForSearch);
-                        }                                                                                            
-
-               /*         const states = [
-                                            "Select State", "Andhra Pradesh", "Andaman and Nicobar Islands", "Arunachal Pradesh", "Assam", "Bihar",
-    "Chandigarh", "Chhattisgarh", "Dadar and Nagar Haveli", "Daman and Diu", "Delhi", "Lakshadweep",
-    "Puducherry", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand",
-    "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
-    "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
-    "Uttarakhand", "West Bengal"
-  ];
-
-  const selectSearchOptions = $('#search_fac_state');
-  
-  $.each(states, function(index, state) {    
-    const option = $('<option>').attr("value",state).text(state);
-    selectSearchOptions.append(option);
-  });
-*/
-                        $("#searchUserBtn").prop("disabled",false);
-
-                        // Create Search Form                    
-
-                    break;
+              
 
                     case "list_all":                            
-                        const colForListAll=$("<div>").addClass("col-md-12").append("<B>Click on below search button to list all users</B>");                            
+                        const colForListAll=$("<div>").addClass("col-md-12").append("<B>Click on below search button to list all buckets under your queue</B>");                            
                         $("#searchUserFilterRow").append(colForListAll);
                         $("#searchUserBtn").prop("disabled",false);
                     break;
@@ -1061,7 +1115,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
          
 
 
-            $("#searchUserForm").submit(function(e){
+            $("#searchBucketForm").submit(function(e){
                 e.preventDefault();
                 
                 checkboxChecked.counter=0;
@@ -1071,33 +1125,24 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
 
                 var searchBy=$("#searchBy").val();
                 switch(searchBy){
-                    case "email_id":
-                        if($("#searchUserForm #search_email_id").val().length===0){
+                    case "bucket_id":
+                        if($("#searchBucketForm #search_bucket_id").val().length===0){
                             error_res=error_res+"<li>Enter User-ID/Email-ID Properly</li>";
                         }
                         else{
                             data_send={
-                                "type":"emailID",
-                                "email_id":$("#searchUserForm #search_email_id").val()
+                                "type":"searchBucket",
+                                "searchBy":"bucket_id",
+                                "bucket_id":$("#searchBucketForm #search_bucket_id").val()
                             };                        
                         }
                     break;
-
-                    case "facility":
-                        if($("#searchUserForm #search_fac_state_facility_id").val()==="Select Branch"){
-                            error_res=error_res+"<li>Select Branch Properly</li>";
-                        }
-                        else{
-                            data_send={
-                                "type":"facID",
-                                "facility_id":$("#searchUserForm #search_fac_state_facility_id").val()
-                            };                        
-                        }
-                    break;
+                   
 
                     case "list_all":
                         data_send={
-                            "type":"listAll",
+                            "type":"searchBucket",
+                            "searchBy":"list_all",
                             "list_all":"yes"
                         };                        
                     break;
@@ -1112,7 +1157,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                 else{
                     $.ajax({
                         type: "POST",
-                        url: './queries/getUserData.php',
+                        url: './queries/bucket.php',
                         data:  {data:data_send},
                         success: function(response)
                         {                            
@@ -1120,15 +1165,14 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                                 alert(response.error_msg);
 
                                 if ($('#user_card_col').length > 0) {
-    // Element with ID 'elementId' exists
-    $("#user_card_col").remove();
-}
+                                    // Element with ID 'elementId' exists
+                                    $("#user_card_col").remove();
+                                }
                                 
 
                             }
                             else{  
-                                                              
-                                
+                                                                                              
                                 if ($('#user_card_col').length > 0) {
     // Element with ID 'elementId' exists
     $("#user_card_col").remove();
@@ -1139,7 +1183,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                                 const user_card=$("<div>").addClass("card");
                                 const user_card_header=$("<div>").addClass("card-header");
                                 const user_card_body=$("<div>").addClass("card-body").attr("style",'overflow-y: auto;');
-                                const user_card_header_h4=$("<h4>").addClass("card-title").append("User Details");
+                                const user_card_header_h4=$("<h4>").addClass("card-title").append("Bucket Details");
                                 user_card_header.append(user_card_header_h4);
                                 user_card.append(user_card_header);
                                 user_card.append(user_card_body);
@@ -1153,27 +1197,40 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                                 const table = $('<table>').addClass('').attr('id','userDataTable');
                                 const thead = $('<thead>');
                                 const tbody = $('<tbody>').attr('id', 'fac_users_table');
-                                const headers = ['first_name', 'last_name', 'mobile_no', 'email_id', 'type', 'status'];
+                                const headers = ['bucket_name', 'status', 'weight', 'dest_id'];
                                 
                                 // Create the header row
-                                const headerRow = $('<tr>');
-                                headerRow.append("<th>");
+                                const headerRow = $('<tr>');                                
+                                headerRow.append("<th>");        
+                                headerRow.append("<th>Actions</th>");                        
                                 headers.forEach(headerText => {
                                     const th = $('<th>').text(headerText);
                                     headerRow.append(th);
-                                });                        
+                                });                                                        
                                 thead.append(headerRow);                                
                                 // Populate table with data from response.users_data
-                                $.each(response.users_data, function(index, getUserData) {
+                                $.each(response.bucket_data, function(index, getUserData) {
                                     if (index < 10) { // Limiting to first 10 rows for overflow
                                         const row = $('<tr>');
-                                        const checkbox=$('<input>').attr('type','checkbox').attr('id',getUserData.user_id).attr('onchange','checkboxChecked(this)');                            
+                                        const checkbox=$('<input>').attr('type','checkbox').attr('id',getUserData.bucket_id).attr('onchange','checkboxChecked(this)');                            
                                         const cell0=$('<td>');
                                         cell0.append(checkbox);
-                                        row.append(cell0);                            
-                                        // Assuming getData is an object with properties corresponding to table headers
+                                        row.append(cell0);
+                                        const cell1=$('<td>');
+                                        const btn=$("<button>").attr({
+                                                    id:getUserData.bucket_id
+                                                   // onclick:"bucketClicked(this)"
+                                                }).text("Track Bucket")
+                                                .on('click', function() {
+                                                    bucketClicked(this);
+                                                });
+                                        cell1.append(btn);
+                                        row.append(cell1);                            
+                                        
                                         headers.forEach(header => {
-                                            const cell = $('<td>').text(getUserData[header.toLowerCase()]);
+                                            var cell;   
+                                            var valToShows=(getUserData[header.toLowerCase()]===null)?"-":getUserData[header.toLowerCase()];                                            
+                                            cell = $('<td>').text(valToShows);
                                             row.append(cell);
                                         });                                                                                      
                                         
@@ -1181,20 +1238,18 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                                     }
                                 });
                         
-                                // Assemble the elements
+                                
                                 table.append(thead);
                                 table.append(tbody);
-                                                    
-                                const editBtn=$('<button>').attr('type','button').attr('id','actionEditBtn').addClass('btn btn-info').attr('onclick','actionEditBtnClick()').append('Edit/Remove Permissions');
-                                const delBtn=$('<button>').attr('type','button').attr('id','actionRemoveBtn').addClass('btn btn-danger').attr('onclick',"actionRemoveBtnClick()").append('Remove User');
-
-                                const action_col=$('<div>').addClass('col-md-3').append(editBtn);
+                                                                                    
+                                const delBtn=$('<button>').attr('type','button').attr('id','actionRemoveBtn').addClass('btn btn-danger').attr('onclick',"actionRemoveBtnClick()").append('Remove Client/Customer Account');
+                                
                                 const action_col1=$('<div>').addClass('col-md-3').append(delBtn);                    
-                                const action_row=$('<div>').addClass('row').append(action_col).append(action_col1);
+                                const action_row=$('<div>').addClass('row').append(action_col1);
                                                   
                                 divCardBody.append(table);         
                                 user_card_body.append(action_row);                       
-                                user_card_body.append(divCardBody); 
+                                user_card_body.append(divCardBody);                                 
                                                       
                             }
                         },
@@ -1253,8 +1308,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
       </div>
       <div class="modal-footer">        
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" id="perSaveBtn" class="btn btn-primary" style='display:none'>Save changes</button>
-        <button type="button" id="userRemoveBtn" class="btn btn-primary" style='display:none'>Remove Selected Users</button>
+        <button type="button" id="addShipBtn" class="btn btn-primary" onclick="addSelectedToListsBucket()">Add</button>        
       </div>
     </div>
   </div>
@@ -1294,8 +1348,9 @@ include("./includes/quick_links.php");
                                 <div class="card-header">                                    
                                 <div class="tab">
 
-                                    <button class="tablinks" id="fac_collapse_body_btn" onclick="openCity(event, 'search_collapse_body')">Search User</button>                                    
-                                    <button class="tablinks" id="users_collapse_body_btn" onclick="openCity(event, 'create_collapse_body')">Create User</button>                                    
+                                    <button class="tablinks" id="fac_collapse_body_btn" onclick="openCity(event, 'search_collapse_body')">Search Bucket</button>                                    
+                                    <button class="tablinks" id="users_collapse_body_btn" onclick="openCity(event, 'create_collapse_body')">Create Bucket</button>                                    
+                                    <button class="tablinks" id="bucket_collapse_body_btn" onclick="openCity(event, 'search_bucket_collapse_body')">Track Bucket</button>                                                                        
                                 </div>      
                                     <hr/>                                  
                                 </div>
@@ -1308,26 +1363,23 @@ include("./includes/quick_links.php");
                                         if($retPerData!="-1" && $retPerData!="0"){
                                             
                                             
-                                            if(in_array("users_php_VIEW_USERS",$retPerData)){                                                                                        
+                                            if(in_array("bucket_php_VIEW_BUCKET",$retPerData)){                                                                                        
                                             ?>
                                             
                                         <!-- Search User -->   
                                             <div class="card table-plain-bg">
                                                 <div class="card-header ">
-                                                    <h4 class="card-title">Search User</h4>                                                    
+                                                    <h4 class="card-title">Manage Bucket</h4>                                                    
                                                 </div>
                                                 <div class="card-body">
-                                                    <form id="searchUserForm" method="post"> 
+                                                    <form id="searchBucketForm" method="post"> 
                                                         <div class="row">
                                                             <div class="col-md-12">
                                                                 <label>Search By</label>
                                                                 <select name="searchBy" id="searchBy">
-                                                                    <option value="search_by">Search User By</option>
-                                                                    <option value="email_id">User-ID/Email-ID</option>
-                                                                    <?php if($_SESSION['type']==="SADMIN") { ?>
-                                                                    <option value="facility">Branch</option>
-                                                                    <?php } ?>
-                                                                    <option value="list_all">List All Users</option>
+                                                                    <option value="search_by">Search By</option>
+                                                                    <option value="bucket_id">Bucket ID</option>                                                                    
+                                                                    <option value="list_all">All Buckets in Queue</option>
                                                                 </select>
                                                             </div>                                                            
                                                         </div>    
@@ -1352,133 +1404,134 @@ include("./includes/quick_links.php");
                                     ?>                                
                                     </div>
                                 </div>
+
+                                <div class="tabcontent" id="search_bucket_collapse_body">
+                                    <div class="card-body">
+                                   
+                                            
+                                        <!-- Search User -->   
+                                            <div class="card table-plain-bg">
+                                                <div class="card-header ">
+                                                    <h4 class="card-title">Track Bucket</h4>                                                    
+                                                </div>
+                                                <div class="card-body">                 
+                                                    <form id="bucketTrackForm" method="POST">
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <div class="form-group">
+                                                                    <label for="bucketID">Bucket ID</label>
+                                                                    <input type="text" name="bucketID" id="bucketID" class="form-control" placeholder="Enter Bucket ID" required>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <button type="submit" class="btn btn-success">Track</button>
+                                                                <button type="button" class="btn btn-info" id="clearBtn">Clear</button>                                                                                                                                
+                                                            </div>
+                                                        </div>
+                                                    </form>                                 
+                                                </div>
+                                            </div>
+                                    <!-- Search User -->                                                                         
+                                    </div>
+                                     
+
+                                    <div class="card-body" id="bucket_operation_col" style='display:none'>                                                                                                                       
+                                        <div class="card table-plain-bg">
+                                            <div class="card-header ">
+                                                <h4 class="card-title">Actions/Operations</h4>                                                    
+                                            </div>
+                                            <div class="card-body">                 
+                                                <button type='button'class='btn btn-info' id="addShipmentToBucket">Add Shipment to Bucket</button>
+                                                <button type='button'class='btn btn-info' id="remShipmentFromBucket">Remove Shipment to Bucket</button>                                                
+                                                <button type='button'class='btn btn-info' id="deleteBucket">Delete Bucket</button>                                                                            
+                                            </div>
+                                        </div>                                                                                                       
+                                    </div>
+                                    
+                                    <!-- Bucket Track Form -->
+
+                                    <div class="card-body" id="bucket_details_col" style='display:none'>                                                                                                                       
+                                        <div class="card table-plain-bg">
+                                            <div class="card-header ">
+                                                <h4 class="card-title">Bucket Details</h4>                                                    
+                                            </div>
+                                            <div class="card-body" id="bucket_details_body">                 
+                                                                            
+                                            </div>
+                                        </div>                                                                                                       
+                                    </div>
+
+                                    <!-- Bucket Track Form -->
+
+
+
+                                     <!-- Bucket Contents Track Form -->
+
+                                     <div class="card-body" id="bucket_details_contents_col" style='display:none'>                                                                                                                       
+                                        <div class="card table-plain-bg">
+                                            <div class="card-header ">
+                                                <h4 class="card-title">Bucket Contents</h4>        
+                                                <h6>Shipment in this Bucket</h6>       
+                                                <button type='button' class="btn btn-success" onclick="getShipmentDetailsForBucket()">Refresh Details</button>
+                                            </div>
+                                            <div class="card-body" id="bucket_details_contents_body">                 
+                                                                            
+                                            </div>
+                                        </div>                                                                                                       
+                                    </div>
+
+                                    <!-- Bucket Contents Track Form -->
+
+
+
+                                </div>
+
                                 <div class="tabcontent" id="create_collapse_body">
                                     <div class="card-body">       
                                         <?php 
 
-                                            if(in_array("users_php_CREATE_USER",$retPerData)){
+                                            if(in_array("bucket_php_CREATE_BUCKET",$retPerData)){
 
                                             ?>
                                         <!-- Create user -->   
                                                 <div class="card table-plain-bg">
                                                     <div class="card-header ">
-                                                        <h4 class="card-title">Create User</h4>
+                                                        <h4 class="card-title">Create Bucket</h4>
                                                         <p class="card-category">Enter Below Details Properly(Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
+
+                                                        <p class="card-category">
+                                                            Hint: You will be able to add shipments later, if not added during bucket creation<br/>                                                                   
+                                                        </p>
+
                                                     </div>
                                                     <div class="card-body">
-                                                        <form id="createUserForm" method="post">
+                                                        <form id="createBucketForm" method="post">
                                                             <div class="row">
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label>First Name <span style="color:red;font-weight:bold">*</span></label>
-                                                                        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
-                                                                    </div>
-                                                                </div>                                                
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label>Last Name <span style="color:red;font-weight:bold">*</span></label>
-                                                                        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+                                                                        <label>Bucket ID <span style="color:red;font-weight:bold">*</span></label>
+                                                                        <input type="text" class="form-control" id="bucket_id" name="bucket_id" placeholder="Bucket ID" required>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label>Mobile Number <span style="color:red;font-weight:bold">*</span></label>
-                                                                        <input type="text" id="mobile_no" name="mobile_no" class="form-control" placeholder="Mobile Number" required>
-                                                                    </div>
-                                                                </div>
-                                                            </div>                                            
-                                                            <div class="row">
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label>Email Address <span style="color:red;font-weight:bold">*</span></label>
-                                                                        <input type="email" id="email_id" name="email_id" class="form-control" placeholder="Email Address" required>
+                                                                        <label>Bucket Name <span style="color:red;font-weight:bold">*</span></label>
+                                                                        <input type="text" class="form-control" id="bucket_name" name="bucket_name" placeholder="Bucket Name" required>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label>Type <span style="color:red;font-weight:bold">*</span><a href='./faq.php?topic_type=users&sub_topic=create_user' target='_blank'> (For More info on user type Click Here)</a></label>
-                                                                        <select class="form-control" id="type" name="type">
-                                                                            <option value="Select User Type">Select User Type</option>
-                                                                            <option value="NUSER">Normal User</option>
-                                                                            <?php
-                                                                            if($_SESSION['type']==="SADMIN"){
-                                                                            ?>
-                                                                            <option value="FADMIN">Facility Admin</option>                                                                                                                                                        
-                                                                            <?php 
-                                                                            }
-                                                                            ?>
-                                                                            <option value="DUSER">Delivery Person</option>                                                                            
-                                                                        </select>
+                                                                        <label>Additional Information (Optional)</label>
+                                                                        <textarea type="text" id="additional_information" name="additional_information" class="form-control" placeholder="Additional Information"></textarea>
                                                                     </div>
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label>Password <span style="color:red;font-weight:bold">*</span></label>
-                                                                        <input type="text" id="password" name="password" class="form-control" placeholder="Password" required>
-                                                                    </div>
-                                                                </div>
-                                                            </div>   
+                                                                </div>                                                                                                                             
+                                                            </div>                                    
                                                             
-                                                            <?php 
-                                                                if($_SESSION['type']==="SADMIN"){
-
-                                                            ?>
+                                                                                                                              
                                                             <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="form-group">                                                                        
-                                                                        <input type="checkbox" id="assignFacility" name="assignFacility"> Assign Branch
-                                                                    </div>
-                                                                </div>                                                                
-                                                            </div>    
-                                                            <!-- Assign Branch Row -->
-                                                            <div class="row" id="assignUserFacRow" style='display:none'>
-                                                                <div class="col-md-12">
-                                                                    <div class="card table-plain-bg">  
-                                                                        <div class="card-header ">
-                                                                            <h5 class="card-title">Assign Branch</h5>
-                                                                        </div>                              
-                                                                        <div class="card-body">                                                                                                                                                                                                         
-                                                                            <div class="row form-group">                                                                            
-                                                                            <div class="col-md-3" id="forward_ret_div_country">
-                                                                                    <div class="form-group">
-                                                                                        <label for="assignUserFacCountry" >Country: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                                                        <select id="assignUserFacCountry" name="assignUserFacCountry" class="form-control">                                                                                            
-                                                                                        </select>
-                                                                                    </div>
-                                                                                </div>                                                                                                                                                               
-                                                                                <div class="col-md-3" id="forward_ret_div_state">
-                                                                                    <div class="form-group">
-                                                                                        <label for="assignUserFacState" >State: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                                                        <select id="assignUserFacState" name="assignUserFacState" class="form-control">                                                                                            
-                                                                                        </select>
-                                                                                    </div>
-                                                                                </div>                                       
-                                                                                <div class="col-md-3" id="forward_ret_div_city">
-                                                                                    <div class="form-group">
-                                                                                        <label for="assignUserFacCity" >City: <span style="color:red;font-weight:bold">*</span></label>                                                
-                                                                                        <select id="assignUserFacCity" name="assignUserFacCity" class="form-control">                                                                                            
-                                                                                        </select>
-                                                                                    </div>
-                                                                                </div>                                                                                                                                                                                                                                                                                       
-                                                                                <div class='col-md-3'>
-                                                                                    <label for='facility_id'>Branch</label>
-                                                                                    <select class='form-control' id='facility_id' name='facility_id' disabled>
-                                                                                    </select>
-                                                                                </div>                                        
-                                                                            </div>
-                                                                        </div>  
-                                                                    </div>
-                                                                </div>
-                                                                <!-- Shipment Status Update card -->
-                                                            </div>    
-                                                            <!-- Assign Branch Row -->      
-                                                            <?php 
-                                                            
-                                                                }
-
-                                                            ?>                                
-                                                            <div class="row">
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-2">
                                                                     <button type="submit" class="form-control btn btn-success">Create</button>
                                                                 </div>
                                                             </div>                                    
@@ -1501,6 +1554,7 @@ include("./includes/quick_links.php");
                                 </div>
                                 <!-- Collapse cards -->
                             </div>
+                            
                         </div>                                                                                  
                         <!-- Main Menu -->                                                                    
                     

@@ -19,7 +19,7 @@
         
         $query = "select user_id, first_name, last_name, mobile_no, email_id, type, create_date, status, facility_id,created_by	 from users";
         if($type==="facID")
-            $query.=" where facility_id='".$id."' ";
+            $query.=" where facility_id='".$id."'";
 
         else if($type==="emailID")
             $query.=" where email_id='".$id."'";
@@ -31,12 +31,12 @@
             if($_SESSION['type']==="SADMIN")
                 $query.="";
             else if($_SESSION['type']==="FADMIN")
-                $query.=" where facility_id='".$_SESSION['facility_id']."' ";
+                $query.=" where facility_id='".$_SESSION['facility_id']."'";
 
         }
-        
-        $query.=" AND type <> 'CLIENT' order by facility_id";
 
+        $query.=" AND type='CLIENT' order by facility_id";
+            
         $results=runQuery($query,$connection);
         if($results==="error"){
             // return json            
@@ -59,7 +59,7 @@
             }
             else{                                             
                 $jsonData = array(
-                    'error_msg' => "No Users"
+                    'error_msg' => "No such Clients/Customers"
                 );
                 //$jsonData = json_encode($jsonData);            
             }
@@ -111,7 +111,7 @@
     else{
         
         $curUserID=$_SESSION['user_id'];        
-        $checkPer=checkPermission($curUserID,"users_php_VIEW_USERS",$connection);        
+        $checkPer=checkPermission($curUserID,"client_php_VIEW_CLIENT",$connection);        
         if($checkPer==="1"){
             
             if(isset($_POST['data'])){

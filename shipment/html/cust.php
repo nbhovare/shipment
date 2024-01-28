@@ -9,14 +9,14 @@
     require("./includes/db_connect.php");
     require("./includes/check_permission.php");
 
-    $resForPagePer=checkPermission($_SESSION['user_id'],"users_php",$connection);
+    $resForPagePer=checkPermission($_SESSION['user_id'],"client_php",$connection);
     if($resForPagePer==="0"){
         echo "You do not have permission to this page, Please contact your administrator for any query<br/>";       
         echo "<a href='./index.php'>Click here to goto home page</a>";
     }
     else{
 
-        $retPerData=getUserPermissionForPage($_SESSION['user_id'],"users_php",$connection);
+        $retPerData=getUserPermissionForPage($_SESSION['user_id'],"client_php",$connection);
         if($retPerData!="-1" && $retPerData!="0"){
         
 
@@ -47,7 +47,7 @@
     <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
     <link rel="icon" type="image/png" href="../assets/img/favicon.ico">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <title>Users</title>
+    <title>Clients/Customers</title>
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
     <!--     Fonts and icons     -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
@@ -96,7 +96,7 @@
             
         <?php 
         
-            if(in_array("users_php_VIEW_USERS",$retPerData)){
+            if(in_array("client_php_VIEW_CLIENT",$retPerData)){
 
         ?>
 
@@ -230,12 +230,12 @@ function getCurrentPer(){
         let booking_phpArr=[
   "booking_php_BOOK_SHIP"
 ];
-        let users_phpArr=[
-  "users_php_CREATE_USER",
-  "users_php_MANAGE_PERMISSIONS",
-  "users_php_VIEW_USERS",
-  "users_php_MANAGE_FACILITY",
-  "users_php_REMOVE_USER_FROM_FAC"
+        let client_phpArr=[
+  "client_php_CREATE_CLIENT",
+  "client_php_MANAGE_PERMISSIONS",
+  "client_php_VIEW_CLIENT",
+  "client_php_MANAGE_FACILITY",
+  "client_php_REMOVE_USER_FROM_FAC"
 ];
         let facility_phpArr=[
   "facility_php_CREATE_FACILITY",
@@ -250,21 +250,6 @@ let reports_phpArr=[
   "reports_php_GET_USER_DATA"
 ];
 
-let client_phpArr=[
-    "client_php_CREATE_CLIENT",
-    "client_php_VIEW_CLIENT",
-    "client_php_REMOVE_CLIENT"
-];
-
-let bucket_phpArr=[
-    "bucket_php_CREATE_BUCKET",
-    "bucket_php_VIEW_BUCKET",
-    "bucket_php_DELETE_BUCKET",
-    "bucket_php_REARRANGE_BUCKET",
-    "bucket_php_UPDATE_BUCKET_STATUS"
-];
-
-
                             let opts = null;
 
                             switch(perForPage){
@@ -278,19 +263,11 @@ let bucket_phpArr=[
                                 case "facility_php":
                                     opts=facility_phpArr;
                                 break;
-                                case "users_php":
-                                    opts=users_phpArr;
-                                break;
-                                case "reports_php":
-                                    opts=reports_phpArr;
-                                break;
-
                                 case "client_php":
                                     opts=client_phpArr;
                                 break;
-
-                                case "bucket_php":
-                                    opts=bucket_phpArr;
+                                case "reports_php":
+                                    opts=reports_phpArr;
                                 break;
 
                             }
@@ -476,7 +453,7 @@ function getData(fieldNames){
             if(error_msg!=0){
                 $("#actions_modal_title, #actions_modal_body").empty();                
                 $("#actions_modal").modal('show');
-                $("#actions_modal_title").append('Actions Tab -Remove Users from facility');                
+                $("#actions_modal_title").append('Actions Tab -Remove Clients/Customers from facility');                
                 $("#actions_modal_title").append('<hr>');                
                 $("#actions_modal_body").append(error_msg);                            
             }
@@ -495,9 +472,9 @@ function getData(fieldNames){
                             $("#actions_modal_title").append('Actions Tab -Remove Users from facility');                
                             $("#actions_modal_title").append('<hr>');
                             const data_append=$("<p>").append(
-                                "Are you sure you want to remove selected users from facility"+
-                                "<br/>Total users selected = "+checkboxChecked.counter+
-                                "<br/>Also the permissions assigned to these users will be removed"
+                                "Are you sure you want to remove selected clients/Customers from facility"+
+                                "<br/>Total clients/Customers selected = "+checkboxChecked.counter+
+                                "<br/>Also the permissions assigned to these clients/Customers will be removed"
                             );
                             $("#actions_modal_body").append(data_append);
                             $("#actions_modal").modal('show');                            
@@ -508,7 +485,7 @@ function getData(fieldNames){
             }                        
         }
 
-        function actionEditBtnClick(){
+        /*function actionEditBtnClick(){
             var error_msg="";
             if(checkboxChecked.counter===0 || checkboxChecked.counter===undefined){   
                 error_msg="No Users Selected!!";
@@ -540,8 +517,8 @@ function getData(fieldNames){
                 });
 
                 selectInputForPerType.empty();
-                const arrForSelPerType=["Select Permission For","Book Shipment Page","Track Shipment Page","Users Page","Facility Page","Reports Page","Clients/Customers Page", "Bucket Page"];
-                const arrForSelPerTypeID=["Select Permission For","booking_php","trackshipment_php","users_php","facility_php","reports_php","client_php","bucket_php"];                
+                const arrForSelPerType=["Select Permission For","Book Shipment Page","Track Shipment Page","Users Page","Facility Page","Reports Page"];
+                const arrForSelPerTypeID=["Select Permission For","booking_php","trackshipment_php","client_php","facility_php","reports_php"];                
                 for(let incPer=0;incPer<arrForSelPerType.length;incPer++){
                     const optionForPerType=$("<option>").attr("value",arrForSelPerTypeID[incPer]).text(arrForSelPerType[incPer]);
                     selectInputForPerType.append(optionForPerType);                   
@@ -562,7 +539,7 @@ function getData(fieldNames){
              
             }
 
-        }
+        }*/
 
 
         <?php } ?>
@@ -572,7 +549,7 @@ function getData(fieldNames){
             
 
             <?php 
-                if(in_array("users_php_CREATE_USER",$retPerData)){
+                if(in_array("client_php_CREATE_CLIENT",$retPerData)){
 
                     if($_SESSION['type']==="SADMIN"){
             ?>
@@ -695,19 +672,19 @@ function getData(fieldNames){
                         success: function(response)
                         {
                             if(response.error_msg){
-                                $("#createUserForm #facility_id").empty();
-                                $("#createUserForm #facility_id").prop("disabled",true);
+                                $("#createClientForm #facility_id").empty();
+                                $("#createClientForm #facility_id").prop("disabled",true);
                                 alert(response.error_msg.error_msg);                                    
                             }
                             else{    
-                                $("#createUserForm #facility_id").empty();
-                                $("#createUserForm #facility_id").prop("disabled",false);
-                                $("#createUserForm #facility_id").append("\
+                                $("#createClientForm #facility_id").empty();
+                                $("#createClientForm #facility_id").prop("disabled",false);
+                                $("#createClientForm #facility_id").append("\
                                     <option value='Select Branch'>Select Branch</option>");
 
                                 $.each(response.facility_data, function(index, getData) {
                                     
-                                    $("#createUserForm #facility_id").append("\
+                                    $("#createClientForm #facility_id").append("\
                                         <option value="+getData.facility_id+">"+getData.facility_name+"</option>");
                                     });
                                     
@@ -727,20 +704,16 @@ function getData(fieldNames){
 
             ?>
 
-            $('#createUserForm').submit(function(e) {
+            $('#createClientForm').submit(function(e) {
                 e.preventDefault();
-                var formData = $('#createUserForm').serializeArray();
+                var formData = $('#createClientForm').serializeArray();
                 
                 var error_res="";                
 
                 if(formData.find(field => field.name === "mobile_no").value.length!=10){
                     error_res=error_res+"<li>Enter Mobile Number Properly</li>";
                 }
-                
-                if(formData.find(field => field.name === "type").value==="Select User Type"){
-                    error_res=error_res+"<li>Incorrect Value for User Type</li>";
-                }
-                                
+                                                                
                 if ($("#assignFacility").is(':checked')) {
                     if(formData.find(field => field.name === "assignUserFacState").value==="Select State"){
                         error_res=error_res+"<li>Select State Properly</li>";
@@ -785,44 +758,26 @@ function getData(fieldNames){
 }
 
 
-async function storeHashedPassword() {
-    try {
-        const hashedPassword = await hashPassword($("#createUserForm #password"));
-        // Convert the hashed password to a hexadecimal string
-        const hashedPasswordHex = Array.from(new Uint8Array(hashedPassword))
-            .map(byte => byte.toString(16).padStart(2, '0'))
-            .join('');
-        //hashedPass = hashedPasswordHex;        
-        formDataObject["password"] = hashedPasswordHex;
-    } catch (error) {
-        console.error('Error hashing password:', error);
-    }
-}
+// 
 
-// Call the function to store the hashed password
-storeHashedPassword();
 
-/*
-hashPassword($("#createUserForm #password"))
-    .then(hashedPassword => {
-        // Convert the hashed password to a hexadecimal string
-        const hashedPasswordHex = Array.from(new Uint8Array(hashedPassword))
-            .map(byte => byte.toString(16).padStart(2, '0'))
-            .join('');                                
-    })
-    .catch(error => {
-        console.error('Error hashing password:', error);    
-    });                    
-                */ 
+hashPassword($("#createClientForm #password").val())
+        .then(hashedPassword => {
+            // Convert the hashed password to a hexadecimal string
+            const hashedPasswordHex = Array.from(new Uint8Array(hashedPassword))
+                .map(byte => byte.toString(16).padStart(2, '0'))
+                .join('');
+                            
+                
+                //return hashPassword($("#currentPassword").val());
 
-    //console.log(hashedPass);
-      //              formDataObject["password"] = hashedPass;
-                    // Convert the JSON object to a JSON string
-                    var formDataJSON = JSON.stringify(formDataObject);                    
-                                                     
+                formDataObject["password"] = hashedPasswordHex;
+                var formDataJSON = JSON.stringify(formDataObject);        
+                
+
                     $.ajax({
                         type: "POST",
-                        url: './queries/createUser.php',
+                        url: './queries/createClient.php',
                         data:  {data: formDataJSON},
                         success: function(response)
                         {                                                        
@@ -831,7 +786,7 @@ hashPassword($("#createUserForm #password"))
                                 alert(responseData[0].error_msg);
                             }
                             else{
-                                document.getElementById('createUserForm').reset();
+                                document.getElementById('createClientForm').reset();
                                 alert(responseData[0].ret_msg);
                             }
                         },
@@ -840,6 +795,15 @@ hashPassword($("#createUserForm #password"))
                             // You can provide a more user-friendly error message or handle errors as needed.
                         }
                     });
+
+                    })                            
+                    .catch(error => {
+            console.error('Error hashing password:', error);
+        });
+
+// jj
+
+                  
                 }
             });
 
@@ -847,7 +811,7 @@ hashPassword($("#createUserForm #password"))
 
             <?php 
 
-if(in_array("users_php_VIEW_USERS",$retPerData)){
+if(in_array("client_php_VIEW_CLIENT",$retPerData)){
 
 ?>   
             
@@ -876,8 +840,6 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
         return $(this).val();
     }).get();
 
-
-    
 
                 data_send={
                     "type":"update",
@@ -932,7 +894,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
 
                     $.ajax({
                         type: "POST",
-                        url: './queries/removeUserFromFac.php',
+                        url: './queries/removeClientFromFac.php',
                         data:  {data: data_send},
                         success: function(response)
                         {                                                        
@@ -973,7 +935,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                     case "email_id":
                         const colForEmail=$("<div>").addClass("col-md-4");
                         const inputDiv=$("<div>").addClass("form-group");
-                        const inputEmailSearchLabel=$("<label>").text("User-ID/Email-ID (Required *)");
+                        const inputEmailSearchLabel=$("<label>").text("Email-ID (Required *)");
                         const inputEmailSearch=$("<input>").attr({
                             "type":"email",
                             "id":"search_email_id",
@@ -1050,7 +1012,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                     break;
 
                     case "list_all":                            
-                        const colForListAll=$("<div>").addClass("col-md-12").append("<B>Click on below search button to list all users</B>");                            
+                        const colForListAll=$("<div>").addClass("col-md-12").append("<B>Click on below search button to list all Clients</B>");                            
                         $("#searchUserFilterRow").append(colForListAll);
                         $("#searchUserBtn").prop("disabled",false);
                     break;
@@ -1112,7 +1074,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                 else{
                     $.ajax({
                         type: "POST",
-                        url: './queries/getUserData.php',
+                        url: './queries/getClientData.php',
                         data:  {data:data_send},
                         success: function(response)
                         {                            
@@ -1139,7 +1101,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                                 const user_card=$("<div>").addClass("card");
                                 const user_card_header=$("<div>").addClass("card-header");
                                 const user_card_body=$("<div>").addClass("card-body").attr("style",'overflow-y: auto;');
-                                const user_card_header_h4=$("<h4>").addClass("card-title").append("User Details");
+                                const user_card_header_h4=$("<h4>").addClass("card-title").append("Client/Customers  Details");
                                 user_card_header.append(user_card_header_h4);
                                 user_card.append(user_card_header);
                                 user_card.append(user_card_body);
@@ -1153,7 +1115,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                                 const table = $('<table>').addClass('').attr('id','userDataTable');
                                 const thead = $('<thead>');
                                 const tbody = $('<tbody>').attr('id', 'fac_users_table');
-                                const headers = ['first_name', 'last_name', 'mobile_no', 'email_id', 'type', 'status'];
+                                const headers = ['first_name', 'mobile_no', 'email_id', 'type', 'status'];
                                 
                                 // Create the header row
                                 const headerRow = $('<tr>');
@@ -1173,7 +1135,11 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                                         row.append(cell0);                            
                                         // Assuming getData is an object with properties corresponding to table headers
                                         headers.forEach(header => {
-                                            const cell = $('<td>').text(getUserData[header.toLowerCase()]);
+                                            var cell;
+                                            if(header==="first_name")
+                                                cell = $('<td>').append("<a href='./usrProfile.php?user_id="+getUserData.user_id+"' target='_blank'>"+getUserData[header.toLowerCase()]+"</a>");
+                                            else    
+                                                cell = $('<td>').text(getUserData[header.toLowerCase()]);
                                             row.append(cell);
                                         });                                                                                      
                                         
@@ -1184,13 +1150,11 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
                                 // Assemble the elements
                                 table.append(thead);
                                 table.append(tbody);
-                                                    
-                                const editBtn=$('<button>').attr('type','button').attr('id','actionEditBtn').addClass('btn btn-info').attr('onclick','actionEditBtnClick()').append('Edit/Remove Permissions');
-                                const delBtn=$('<button>').attr('type','button').attr('id','actionRemoveBtn').addClass('btn btn-danger').attr('onclick',"actionRemoveBtnClick()").append('Remove User');
-
-                                const action_col=$('<div>').addClass('col-md-3').append(editBtn);
+                                                                                    
+                                const delBtn=$('<button>').attr('type','button').attr('id','actionRemoveBtn').addClass('btn btn-danger').attr('onclick',"actionRemoveBtnClick()").append('Remove Client/Customer Account');
+                                
                                 const action_col1=$('<div>').addClass('col-md-3').append(delBtn);                    
-                                const action_row=$('<div>').addClass('row').append(action_col).append(action_col1);
+                                const action_row=$('<div>').addClass('row').append(action_col1);
                                                   
                                 divCardBody.append(table);         
                                 user_card_body.append(action_row);                       
@@ -1254,7 +1218,7 @@ if(in_array("users_php_VIEW_USERS",$retPerData)){
       <div class="modal-footer">        
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         <button type="button" id="perSaveBtn" class="btn btn-primary" style='display:none'>Save changes</button>
-        <button type="button" id="userRemoveBtn" class="btn btn-primary" style='display:none'>Remove Selected Users</button>
+        <button type="button" id="userRemoveBtn" class="btn btn-primary" style='display:none'>Remove Selected Clients/Customers</button>
       </div>
     </div>
   </div>
@@ -1294,8 +1258,8 @@ include("./includes/quick_links.php");
                                 <div class="card-header">                                    
                                 <div class="tab">
 
-                                    <button class="tablinks" id="fac_collapse_body_btn" onclick="openCity(event, 'search_collapse_body')">Search User</button>                                    
-                                    <button class="tablinks" id="users_collapse_body_btn" onclick="openCity(event, 'create_collapse_body')">Create User</button>                                    
+                                    <button class="tablinks" id="fac_collapse_body_btn" onclick="openCity(event, 'search_collapse_body')">Search Clients</button>                                    
+                                    <button class="tablinks" id="users_collapse_body_btn" onclick="openCity(event, 'create_collapse_body')">Create Clients</button>                                    
                                 </div>      
                                     <hr/>                                  
                                 </div>
@@ -1308,13 +1272,13 @@ include("./includes/quick_links.php");
                                         if($retPerData!="-1" && $retPerData!="0"){
                                             
                                             
-                                            if(in_array("users_php_VIEW_USERS",$retPerData)){                                                                                        
+                                            if(in_array("client_php_VIEW_CLIENT",$retPerData)){                                                                                        
                                             ?>
                                             
                                         <!-- Search User -->   
                                             <div class="card table-plain-bg">
                                                 <div class="card-header ">
-                                                    <h4 class="card-title">Search User</h4>                                                    
+                                                    <h4 class="card-title">Search Clients/Customers</h4>                                                    
                                                 </div>
                                                 <div class="card-body">
                                                     <form id="searchUserForm" method="post"> 
@@ -1322,12 +1286,12 @@ include("./includes/quick_links.php");
                                                             <div class="col-md-12">
                                                                 <label>Search By</label>
                                                                 <select name="searchBy" id="searchBy">
-                                                                    <option value="search_by">Search User By</option>
+                                                                    <option value="search_by">Search By</option>
                                                                     <option value="email_id">User-ID/Email-ID</option>
                                                                     <?php if($_SESSION['type']==="SADMIN") { ?>
                                                                     <option value="facility">Branch</option>
                                                                     <?php } ?>
-                                                                    <option value="list_all">List All Users</option>
+                                                                    <option value="list_all">List All Clients</option>
                                                                 </select>
                                                             </div>                                                            
                                                         </div>    
@@ -1356,28 +1320,27 @@ include("./includes/quick_links.php");
                                     <div class="card-body">       
                                         <?php 
 
-                                            if(in_array("users_php_CREATE_USER",$retPerData)){
+                                            if(in_array("client_php_CREATE_CLIENT",$retPerData)){
 
                                             ?>
                                         <!-- Create user -->   
                                                 <div class="card table-plain-bg">
                                                     <div class="card-header ">
-                                                        <h4 class="card-title">Create User</h4>
+                                                        <h4 class="card-title">Create Clients</h4>
                                                         <p class="card-category">Enter Below Details Properly(Fields marked as <span style="color:red;font-weight:bold">" * "</span> are required)</p>
+
+                                                        <p class="card-category">
+                                                            Note: Clients/Customers Account will be given BOOK_SHIPMENT & TRACK permissions by default, Hence these permissions cannot be edited<br/>                                                                   
+                                                        </p>
+
                                                     </div>
                                                     <div class="card-body">
-                                                        <form id="createUserForm" method="post">
+                                                        <form id="createClientForm" method="post">
                                                             <div class="row">
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label>First Name <span style="color:red;font-weight:bold">*</span></label>
-                                                                        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
-                                                                    </div>
-                                                                </div>                                                
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label>Last Name <span style="color:red;font-weight:bold">*</span></label>
-                                                                        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+                                                                        <label>Client/Customer Name <span style="color:red;font-weight:bold">*</span></label>
+                                                                        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="Client/Customer Name" required>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-md-4">
@@ -1385,38 +1348,27 @@ include("./includes/quick_links.php");
                                                                         <label>Mobile Number <span style="color:red;font-weight:bold">*</span></label>
                                                                         <input type="text" id="mobile_no" name="mobile_no" class="form-control" placeholder="Mobile Number" required>
                                                                     </div>
-                                                                </div>
-                                                            </div>                                            
-                                                            <div class="row">
+                                                                </div>                                                            
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
                                                                         <label>Email Address <span style="color:red;font-weight:bold">*</span></label>
                                                                         <input type="email" id="email_id" name="email_id" class="form-control" placeholder="Email Address" required>
                                                                     </div>
-                                                                </div>
+                                                                </div>    
+                                                            </div>                                    
+                                                                <div class="row">                       
                                                                 <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label>Type <span style="color:red;font-weight:bold">*</span><a href='./faq.php?topic_type=users&sub_topic=create_user' target='_blank'> (For More info on user type Click Here)</a></label>
-                                                                        <select class="form-control" id="type" name="type">
-                                                                            <option value="Select User Type">Select User Type</option>
-                                                                            <option value="NUSER">Normal User</option>
-                                                                            <?php
-                                                                            if($_SESSION['type']==="SADMIN"){
-                                                                            ?>
-                                                                            <option value="FADMIN">Facility Admin</option>                                                                                                                                                        
-                                                                            <?php 
-                                                                            }
-                                                                            ?>
-                                                                            <option value="DUSER">Delivery Person</option>                                                                            
-                                                                        </select>
+                                                                        <div class="form-group">
+                                                                            <label for="">Address <span style="color:red;font-weight:bold">*</span></label>
+                                                                            <textarea name="address" id="address" cols="30" rows="10" class="form-control" required></textarea>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label>Password <span style="color:red;font-weight:bold">*</span></label>
+                                                                        <label>Client Account Password <span style="color:red;font-weight:bold">*</span></label>
                                                                         <input type="text" id="password" name="password" class="form-control" placeholder="Password" required>
                                                                     </div>
-                                                                </div>
+                                                                </div>                                                                     
                                                             </div>   
                                                             
                                                             <?php 
@@ -1478,7 +1430,7 @@ include("./includes/quick_links.php");
 
                                                             ?>                                
                                                             <div class="row">
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-2">
                                                                     <button type="submit" class="form-control btn btn-success">Create</button>
                                                                 </div>
                                                             </div>                                    
